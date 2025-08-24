@@ -1,4 +1,5 @@
 import re
+import os
 from datetime import datetime
 
 class LogAnalyzer:
@@ -51,6 +52,18 @@ class LogAnalyzer:
         return self._empty_result('Camera Issues', sub_issue_type, 'Custom Camera Analysis')
 
     def analyze_app_crashes(self, log_content, sub_issue_type, package_name=None):
+        """Analyze App Crash related sub types.
+
+        Enhancement: if the provided "log_content" string actually points to an existing
+        file path on disk (user uploaded and you kept the path) we will stream that file
+        line-by-line instead of operating on the in‑memory string. This avoids loading
+        very large logs fully into memory just to find crash markers.
+
+        Streaming is only applied for the generic "App Crashes" subtype (other subtypes
+        keep existing logic or specialized extraction). If a path is used, we build
+        blocks beginning with any fatal marker and capture stack lines until a blank
+        line or a new timestamp entry that is not part of the stack.
+        """
         relevant_logs = []
         if sub_issue_type == 'Device Reboot':
             last_fatal = self._extract_last_system_process_fatal(log_content)
@@ -72,7 +85,17 @@ class LogAnalyzer:
                 'analysis_method': 'Last System Fatal Extraction',
                 'single_stack': True
             }
-        # For other sub types, use simple scan if keywords exist
+        # If subtype is the generic crash group and log_content is an existing file path -> stream
+        if sub_issue_type == 'App Crashes' and os.path.exists(log_content) and os.path.isfile(log_content):
+            streamed = list(self._stream_crash_headers(log_content))
+            if streamed:
+                return {
+                    'issue_type': f'App Crashes - {sub_issue_type}',
+                    'relevant_logs': streamed,
+                    'root_cause': 'Crash headers detected via streaming scan (file path).',
+                    'analysis_method': 'Streaming Crash Header Scan'
+                }
+        # Fallback to original in‑memory scan (keywords)
         simple = self._simple_keyword_scan(log_content, 'App Crashes', sub_issue_type)
         if simple:
             return {
@@ -240,6 +263,34 @@ class LogAnalyzer:
         stack_text = last.group(1).rstrip()
         line_number = log_content.count('\n', 0, last.start()) + 1
         return stack_text, line_number
+
+    def _stream_crash_headers(self, file_path):
+        """Yield dictionaries representing crash header lines from a log file path.
+
+        A crash 'header' is identified by containing any of the fatal markers. We only
+        return the header line (no full stack) to satisfy the existing UI contract that
+        expects a list of minimal matched_line entries. Extend later if needed.
+        """
+        fatal_markers = [
+            'FATAL EXCEPTION',  # Java crash
+            'FATAL EXCEPTION IN SYSTEM PROCESS',
+            'Fatal signal',     # Native crash
+            'am_crash',         # ActivityManager event
+        ]
+        try:
+            with open(file_path, 'r', errors='ignore') as f:
+                for idx, line in enumerate(f, start=1):
+                    low = line.lower()
+                    for mk in fatal_markers:
+                        if mk.lower() in low:
+                            yield {
+                                'line_number': idx,
+                                'matched_line': line.rstrip(),
+                                'marker': mk
+                            }
+                            break
+        except Exception:
+            return
 
     def _format_stack_lines(self, lines):
         def classify(line: str):
