@@ -87,13 +87,13 @@ class LogAnalyzer:
             }
         # If subtype is the generic crash group and log_content is an existing file path -> stream
         if sub_issue_type == 'App Crashes' and os.path.exists(log_content) and os.path.isfile(log_content):
-            streamed = list(self._stream_crash_headers(log_content))
+            streamed = [s for s in self._stream_crash_headers(log_content) if 'fatal exception' in s['matched_line'].lower()]
             if streamed:
                 return {
                     'issue_type': f'App Crashes - {sub_issue_type}',
                     'relevant_logs': streamed,
-                    'root_cause': 'Crash headers detected via streaming scan (file path).',
-                    'analysis_method': 'Streaming Crash Header Scan'
+                    'root_cause': 'Fatal exception headers detected via streaming scan (file path).',
+                    'analysis_method': 'Streaming Fatal Exception Header Scan'
                 }
         # Fallback to original in‑memory scan (keywords)
         simple = self._simple_keyword_scan(log_content, 'App Crashes', sub_issue_type)
@@ -209,14 +209,11 @@ class LogAnalyzer:
         if not keywords:
             return []
         keywords_lower = [k.lower() for k in keywords]
-        # For App Crashes generic subtype, tighten filtering to avoid unrelated ActivityManager slow ops etc.
         restrict_activitymanager = False
         if key == ('App Crashes', 'App Crashes'):
+            # Override: only keep 'fatal exception' lines per updated requirement (exclude process:, am_crash, fatal signal etc.)
+            keywords_lower = ['fatal exception']
             restrict_activitymanager = True
-            # augment keywords to include common exception markers if not already present
-            for extra in ['exception', 'fatal signal', 'am_crash']:
-                if extra not in keywords_lower:
-                    keywords_lower.append(extra)
         results = []
         # Simulate readline loop (no need to allocate all lines twice)
         lines = log_content.splitlines()
