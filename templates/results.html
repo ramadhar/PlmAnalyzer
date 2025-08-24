@@ -327,33 +327,15 @@
                 <div style="margin-top:8px;"><strong>Package:</strong><br>{{ result.package_name if result.package_name else 'All' }}</div>
             </div>
             {% if result.log_id %}
-            <div class="sidebar-section" id="metrics_panel">
-                <label style="margin-bottom:4px;font-weight:600;">Metrics</label>
-                <div id="metrics_body" class="metrics-body">Loading...</div>
-            </div>
-            <div class="sidebar-section" id="compare_panel">
-                <label style="margin-bottom:4px;font-weight:600;">Compare</label>
-                <select id="cmp_a_main" class="side-select compact"></select>
-                <select id="cmp_a_sub" class="side-select compact"></select>
-                <select id="cmp_b_main" class="side-select compact"></select>
-                <select id="cmp_b_sub" class="side-select compact"></select>
-                <button id="compare_btn" class="secondary-btn" style="margin-top:6px;">Compare</button>
-                <pre id="compare_result" class="compare-output"></pre>
-            </div>
+            <!-- Metrics & compare removed with eager mode deprecation -->
             {% endif %}
             <a href="{{ url_for('index') }}" class="back-link"><i class="fas fa-arrow-left"></i> New Upload</a>
         </aside>
         <main class="main-pane">
             <section class="logs-pane">
                 <div class="pane-header" style="gap:12px;"><i class="fas fa-file-alt"></i>
-                    <span id="log_view_title">{% if result.eager_mode %}Preview{% else %}Issue Logs{% endif %}</span>
-                    <div style="margin-left:auto;display:flex;gap:6px;">
-                        {% if result.eager_mode %}
-                        <button id="btn_show_preview" style="background:#1e293b;color:#e2e8f0;border:1px solid #475569;font-size:.6rem;padding:4px 8px;border-radius:4px;cursor:pointer;">Preview</button>
-                        <button id="btn_show_summary" style="background:#334155;color:#e2e8f0;border:1px solid #475569;font-size:.6rem;padding:4px 8px;border-radius:4px;cursor:pointer;">Summary</button>
-                        <a href="/raw_log/{{ result.log_id }}" target="_blank" style="align-self:center;font-size:.6rem;color:#bae6fd;text-decoration:none;padding-top:1px;">Full</a>
-                        {% endif %}
-                    </div>
+                    <span id="log_view_title">Issue Logs</span>
+                    <div style="margin-left:auto;display:flex;gap:6px;"></div>
                 </div>
                 <pre class="code-view" id="raw_log_pre" style="position:relative;">{{ result.preview_log if result.preview_log else 'No relevant log lines extracted for this issue.' }}</pre>
             </section>
@@ -382,7 +364,6 @@
 
     <script>
     const logId = "{{ result.log_id if result.log_id else '' }}";
-    // Embed JSON safely as string then parse
     const issueMap = JSON.parse(`{{ (result.all_issue_types | tojson | safe) if result.all_issue_types else '{}' }}`);
     const currentMain = '{{ result.main_issue_type }}';
     const currentSub = '{{ result.sub_issue_type }}';
@@ -396,92 +377,14 @@
             });
             populateSub();
         }
-        function populateSub(){
+    function populateSub(){
             const mainSel=document.getElementById('switch_main');
             const subSel=document.getElementById('switch_sub');
             if(!mainSel||!subSel)return;subSel.innerHTML='';
             (issueMap[mainSel.value]||[]).forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;if(mainSel.value===currentMain && s===currentSub)o.selected=true;subSel.appendChild(o);});
         }
         document.addEventListener('change',e=>{if(e.target&&e.target.id==='switch_main'){populateSub();}});
-        document.addEventListener('click',e=>{
-            if(e.target&&e.target.id==='switch_btn'){
-                const m=document.getElementById('switch_main').value;
-                const s=document.getElementById('switch_sub').value;
-                if(!logId)return; e.target.disabled=true; e.target.textContent='Loading...';
-                fetch("{{ url_for('switch_issue') }}", {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({log_id:logId, main_issue_type:m, sub_issue_type:s})})
-                    .then(r=>r.json()).then(data=>{
-                        if(data.error){alert(data.error);} else {
-                            const selEl=document.querySelector('.issue-type'); if(selEl){ selEl.textContent=data.selected_issue; }
-                            const section=document.querySelectorAll('.log-section')[0];
-                            if(section){
-                                let html='';
-                                if(data.relevant_logs&&data.relevant_logs.length){
-                                    if(data.single_stack){html+='<h3><i class="fas fa-search"></i> Last System Fatal Stack Trace</h3>';}
-                                    else {html+=`<h3><i class=\"fas fa-search\"></i> Relevant Log Entries (${data.relevant_logs.length} found)</h3>`;}
-                                    data.relevant_logs.forEach(le=>{
-                                        html+='<div class="log-entry">';
-                                        html+='<div class="log-entry-header">';
-                                        html+=`<span class=\"line-number\">Line ${le.line_number||''}</span>`;
-                                        if(!data.single_stack){html+='<span style=\"color:#6b7280;font-size:0.8rem;\">Context</span>';}
-                                        html+='</div>';
-                                        html+=`<div class=\"matched-line\">${(le.matched_line||'').replace(/</g,'&lt;')}</div>`;
-                                        if(le.context){const esc=le.context.map(l=>l.replace(/</g,'&lt;')).join('\n');html+=`<pre class=\"context-lines\">${esc}</pre>`;}
-                                        html+='</div>';
-                                    });
-                                } else {html+='<h3><i class="fas fa-search"></i> Relevant Log Entries (0 found)</h3><p style="color:#6b7280;font-style:italic;">No specific log entries matched the issue patterns.</p>';}
-                                section.innerHTML=html;
-                            }
-                            const rc=document.querySelector('.root-cause p'); if(rc){rc.textContent=data.root_cause||'';}
-                            // Update analysis-only preview in lazy mode or when preview toggle absent
-                            const pre=document.getElementById('raw_log_pre');
-                            if(pre && !document.getElementById('btn_show_preview')){
-                                pre.textContent = data.preview_log || 'No relevant log lines extracted for this issue.';
-                            }
-                        }
-                    }).catch(err=>alert(err)).finally(()=>{e.target.disabled=false;e.target.textContent='Load Selected Issue';});
-            }
-        });
-        // Animate bars (if present)
     document.addEventListener('DOMContentLoaded',()=>{try{populateMain();}catch(e){console.error('Populate main failed',e);}});
-        // Metrics & Compare logic
-        function renderMetrics(data){
-            const body=document.getElementById('metrics_body'); if(!body) return;
-            const m=data.metrics||{}; let html='';
-            Object.keys(m).sort().forEach(main=>{
-                const obj=m[main];
-                const total=obj.total_expected || (issueMap[main]?issueMap[main].length:obj.computed);
-                html+=`<div style="margin-bottom:6px;"><strong>${main}</strong>: ${obj.computed}/${total} computed`; 
-                const subs=obj.subtypes||{}; let details=[];
-                Object.keys(subs).forEach(s=>{details.push(`${s}=${subs[s]}`);});
-                if(details.length) html+=` <span style="color:#6b7280;">(${details.join(', ')})</span>`;
-                html+='</div>';
-            });
-            if(!html) html='No metrics available.';
-            body.innerHTML=html;
-        }
-        function loadMetrics(){
-            if(!logId) return; fetch(`/metrics?log_id=${logId}`).then(r=>r.json()).then(renderMetrics).catch(()=>{const b=document.getElementById('metrics_body'); if(b) b.textContent='Failed to load metrics';});
-        }
-        function fillCompareSelectors(){
-            if(!logId) return; const am=document.getElementById('cmp_a_main'); const asub=document.getElementById('cmp_a_sub'); const bm=document.getElementById('cmp_b_main'); const bsub=document.getElementById('cmp_b_sub');
-            if(!am) return;
-            function fillMain(sel){ sel.innerHTML=''; Object.keys(issueMap).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k; sel.appendChild(o);}); }
-            function fillSub(mainSel, subSel){ subSel.innerHTML=''; (issueMap[mainSel.value]||[]).forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s; subSel.appendChild(o);}); }
-            fillMain(am); fillMain(bm);
-            fillSub(am, asub); fillSub(bm, bsub);
-        }
-        document.addEventListener('click', e=>{
-            if(e.target && e.target.id==='compare_btn'){
-                const payload={log_id:logId,a_main:cmp_a_main.value,a_sub:cmp_a_sub.value,b_main:cmp_b_main.value,b_sub:cmp_b_sub.value};
-                const out=document.getElementById('compare_result'); out.textContent='Comparing...';
-                fetch('/compare_issues',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(r=>r.json()).then(data=>{
-                    if(data.error){out.textContent=data.error;return;}
-                    out.textContent=`A: ${data.a.main} - ${data.a.sub} (${data.a.count})\nB: ${data.b.main} - ${data.b.sub} (${data.b.count})\nOverlap: ${data.intersection_count}\nA only: ${data.a_only}\nB only: ${data.b_only}`;
-                }).catch(err=>{out.textContent='Error: '+err;});
-            }
-        });
-    document.addEventListener('DOMContentLoaded',()=>{try{loadMetrics(); fillCompareSelectors();}catch(e){console.error('Init metrics/compare failed',e);}});
-    // Embedded summary & preview payloads
     </script>
     {% if result.eager_mode %}
     <script id="preview_payload" type="application/json">{{ result.preview_log|tojson }}</script>

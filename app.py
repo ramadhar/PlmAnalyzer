@@ -422,25 +422,19 @@ _load_cache_from_disk()
 def _analyze_pair(analyzer: LogAnalyzer, log_content: str, package: str, main: str, sub: str):
     return analyzer.analyze_issue_by_type(log_content, main, sub, package)
 
-def _store_log_with_analyses(log_content: str, package_name: str, analyzer_factory, eager: bool, selected_pair):
+def _store_log_with_analyses(log_content: str, package_name: str, analyzer_factory, selected_pair):
+    """Store a log and compute ONLY the selected (main, sub) analysis.
+    Eager mode removed: we no longer precompute all issue types to simplify UX and performance."""
     log_id = str(uuid.uuid4())
     analyzer = analyzer_factory()
     analyses = {}
-    if eager:
-        for main, subs in ISSUE_TYPE_MAP.items():
-            for sub in subs:
-                res = _analyze_pair(analyzer, log_content, package_name, main, sub)
-                analyses[(main, sub)] = res
-    else:
-        # Only compute selected
-        main, sub = selected_pair
-        analyses[(main, sub)] = _analyze_pair(analyzer, log_content, package_name, main, sub)
+    main, sub = selected_pair
+    analyses[(main, sub)] = _analyze_pair(analyzer, log_content, package_name, main, sub)
     LOG_CACHE[log_id] = {
         'log': log_content,
         'package_name': package_name,
         'created': time.time(),
-        'analyses': analyses,
-        'eager_mode': eager
+        'analyses': analyses
     }
     _prune_cache()
     _persist_entry(log_id)
@@ -702,19 +696,14 @@ def upload_file():
         raw_bytes = file.read()
         size = len(raw_bytes)
         log_content = raw_bytes.decode('utf-8', errors='ignore')
-        logger.info(f"UPLOAD size={size}B main={main_issue_type} sub={sub_issue_type} eager={request.form.get('eager_mode')}")
-        eager_flag = request.form.get('eager_mode', 'true').lower() == 'true'
+        logger.info(f"UPLOAD size={size}B main={main_issue_type} sub={sub_issue_type}")
         log_id = _store_log_with_analyses(
             log_content,
             package_name,
             analyzer_factory=lambda: LogAnalyzer(),
-            eager=eager_flag,
             selected_pair=(main_issue_type, sub_issue_type)
         )
-        if eager_flag:
-            current = LOG_CACHE[log_id]['analyses'].get((main_issue_type, sub_issue_type))
-        else:
-            current = _ensure_analysis(log_id, main_issue_type, sub_issue_type)
+        current = LOG_CACHE[log_id]['analyses'].get((main_issue_type, sub_issue_type))
         current = dict(current)
         # Always set preview to analysis-only relevant logs (no global system properties)
         current['preview_log'] = _build_analysis_preview(current)
@@ -724,8 +713,8 @@ def upload_file():
         current['summary'] = ''
         current['log_id'] = log_id
         current['all_issue_types'] = ISSUE_TYPE_MAP
-        current['eager_mode'] = eager_flag
-        current['metrics'] = _build_metrics(LOG_CACHE[log_id])
+        # metrics removed from UI; keeping computation optional if needed elsewhere
+        # current['metrics'] = _build_metrics(LOG_CACHE[log_id])
         current['main_issue_type'] = main_issue_type
         current['sub_issue_type'] = sub_issue_type
         current['selected_issue'] = f"{main_issue_type} - {sub_issue_type}"
@@ -770,52 +759,7 @@ def api_analyze():
         logger.error(f"API error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-@app.route('/switch_issue', methods=['POST'])
-def switch_issue():
-    """Return cached precomputed analysis for a different issue without re-uploading."""
-    try:
-        data = request.get_json() or {}
-        log_id = data.get('log_id')
-        main_issue_type = data.get('main_issue_type')
-        sub_issue_type = data.get('sub_issue_type')
-        if not all([log_id, main_issue_type, sub_issue_type]):
-            return jsonify({'error': 'Missing parameters'}), 400
-        cache_entry = LOG_CACHE.get(log_id)
-        if not cache_entry:
-            return jsonify({'error': 'Log ID expired'}), 404
-        result = cache_entry['analyses'].get((main_issue_type, sub_issue_type))
-        if not result:
-            return jsonify({'error': 'Analysis not found'}), 404
-        out = dict(result)
-        out['log_id'] = log_id
-        entry = LOG_CACHE[log_id]
-        out['eager_mode'] = entry.get('eager_mode', False)
-        # Analysis-only preview
-        out['preview_log'] = _build_analysis_preview(out)
-        out['summary'] = ''
-        out['main_issue_type'] = main_issue_type
-        out['raw_line_count'] = len(out.get('relevant_logs') or [])
-        out['sub_issue_type'] = sub_issue_type
-        out['selected_issue'] = f"{main_issue_type} - {sub_issue_type}"
-        return jsonify(out)
-    except Exception as e:
-        logger.error(f"Switch issue error: {e}")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/metrics', methods=['GET'])
-def metrics():
-    """Return metrics for a given log_id (computed counts, per-sub counts)."""
-    log_id = request.args.get('log_id')
-    if not log_id:
-        return jsonify({'error': 'log_id required'}), 400
-    entry = LOG_CACHE.get(log_id)
-    if not entry:
-        return jsonify({'error': 'Log ID not found'}), 404
-    return jsonify({
-        'log_id': log_id,
-        'metrics': _build_metrics(entry),
-        'eager_mode': len(entry['analyses']) >= sum(len(v) for v in ISSUE_TYPE_MAP.values())
-    })
+# Removed switch_issue & metrics endpoints as eager-mode multi-analysis selection is deprecated.
 
 # =============================
 # Smart Detection (AI) Prototype
