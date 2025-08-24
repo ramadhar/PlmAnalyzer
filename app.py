@@ -762,6 +762,46 @@ def api_analyze():
 
 # Removed switch_issue & metrics endpoints as eager-mode multi-analysis selection is deprecated.
 
+@app.route('/switch_issue', methods=['POST'])
+def switch_issue():
+    """Compute (or fetch cached) analysis for a different main/sub issue on the
+    already uploaded log (identified by log_id) and return JSON so the UI can
+    update in-place without navigation or re-upload.
+    Input JSON: {log_id, main_issue_type, sub_issue_type}
+    Response: {selected_issue, preview_log, root_cause, main_issue_type, sub_issue_type, timestamp}
+    """
+    try:
+        data = request.get_json(force=True) or {}
+        log_id = data.get('log_id')
+        main_issue_type = data.get('main_issue_type')
+        sub_issue_type = data.get('sub_issue_type')
+        if not all([log_id, main_issue_type, sub_issue_type]):
+            return jsonify({'error': 'missing_parameters'}), 400
+        entry = LOG_CACHE.get(log_id)
+        if not entry:
+            return jsonify({'error': 'log_not_found'}), 404
+        # ensure / compute analysis
+        analyzer = LogAnalyzer()
+        key = (main_issue_type, sub_issue_type)
+        if key not in entry['analyses']:
+            res = _analyze_pair(analyzer, entry['log'], entry['package_name'], main_issue_type, sub_issue_type)
+            entry['analyses'][key] = res
+        result = dict(entry['analyses'][key])
+        preview_log = _build_analysis_preview(result)
+        from datetime import datetime as _dt
+        ts = _dt.now().strftime('%Y-%m-%d %H:%M:%S')
+        return jsonify({
+            'selected_issue': f"{main_issue_type} - {sub_issue_type}",
+            'preview_log': preview_log or 'No relevant log lines extracted for this issue.',
+            'root_cause': result.get('root_cause') or 'No root cause determined.',
+            'main_issue_type': main_issue_type,
+            'sub_issue_type': sub_issue_type,
+            'timestamp': ts
+        })
+    except Exception as e:
+        logger.exception('switch_issue failure')
+        return jsonify({'error': 'internal', 'detail': str(e)}), 500
+
 # =============================
 # Smart Detection (AI) Prototype
 # =============================

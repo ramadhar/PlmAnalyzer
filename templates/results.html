@@ -369,7 +369,28 @@
             (issueMap[mainSel.value]||[]).forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;if(mainSel.value===currentMain && s===currentSub)o.selected=true;subSel.appendChild(o);});
         }
         document.addEventListener('change',e=>{if(e.target&&e.target.id==='switch_main'){populateSub();}});
-    document.addEventListener('DOMContentLoaded',()=>{try{populateMain();}catch(e){console.error('Populate main failed',e);}});
+        document.addEventListener('DOMContentLoaded',()=>{try{populateMain();}catch(e){console.error('Populate main failed',e);} });
+        document.getElementById('switch_btn')?.addEventListener('click', ()=>{
+            const m=document.getElementById('switch_main').value;
+            const s=document.getElementById('switch_sub').value;
+            if(!logId) { alert('Missing log id'); return; }
+            const btn=document.getElementById('switch_btn');
+            btn.disabled=true; const old=btn.textContent; btn.textContent='Loading...';
+            fetch('/switch_issue',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({log_id:logId,main_issue_type:m,sub_issue_type:s})})
+                .then(r=>r.json()).then(data=>{
+                    if(data.error){alert(data.error);return;}
+                    // Update selected issue label
+                    const sel=document.querySelector('.issue-type'); if(sel) sel.textContent=data.selected_issue;
+                    // Update log preview
+                    const pre=document.getElementById('raw_log_pre'); if(pre) pre.textContent=data.preview_log||'';
+                    // Update root cause
+                    const rc=document.querySelector('.rc-text'); if(rc) rc.textContent=data.root_cause||'';
+                    // Update timestamp
+                    const ts=document.querySelector('.timestamp'); if(ts) ts.textContent='Completed: '+data.timestamp;
+                })
+                .catch(err=>alert(err))
+                .finally(()=>{btn.disabled=false; btn.textContent=old;});
+        });
     </script>
     {% if result.eager_mode %}
     <script id="preview_payload" type="application/json">{{ result.preview_log|tojson }}</script>
