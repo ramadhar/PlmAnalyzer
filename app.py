@@ -801,6 +801,11 @@ def index():
 def duplicate_finder():
     return render_template('duplicate_finder.html', ai_mode=AI_MODE)
 
+@app.route('/ai_help')
+def ai_help_page():
+    """UI page for AI assisted analysis & log explanation (frontend only for now)."""
+    return render_template('ai_help.html', ai_mode=AI_MODE)
+
 _translator_instance = None
 
 def _get_translator(target_lang: str = 'en'):

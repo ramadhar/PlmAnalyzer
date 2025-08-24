@@ -380,6 +380,7 @@
                 <a href="{{ url_for('index') }}" class="top-link {% if request.endpoint=='index' %}active{% endif %}"><i class="fas fa-file-medical"></i><span>Logs</span></a>
                 <a href="{{ url_for('duplicate_finder') }}" class="top-link {% if request.endpoint=='duplicate_finder' %}active{% endif %}"><i class="fas fa-copy"></i><span>Duplicates</span></a>
                 <a href="{{ url_for('translate_page') }}" class="top-link {% if request.endpoint=='translate_page' %}active{% endif %}"><i class="fas fa-language"></i><span>Translate</span></a>
+                <a href="{{ url_for('ai_help_page') }}" class="top-link {% if request.endpoint=='ai_help_page' %}active{% endif %}"><i class="fas fa-robot"></i><span>AI Help</span></a>
             </div>
         </div>
     <div class="app-blurb" id="appBlurb">Intelligent Android Issue Detection & Root Cause Analysis {% if ai_mode %}<span style="font-size:.65rem;padding:4px 8px;margin-left:6px;border:1px solid #6366f1;border-radius:20px;background:rgba(99,102,241,.15);color:#cbd5ff;letter-spacing:.08em;">Semantic Enabled</span>{% endif %}</div>

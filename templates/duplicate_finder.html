@@ -113,6 +113,7 @@
             <a class="top-link" href="{{ url_for('index') }}"><i class="fas fa-bug"></i> Logs</a>
             <a class="top-link active" href="{{ url_for('duplicate_finder') }}"><i class="fas fa-copy"></i> Duplicates</a>
             <a class="top-link" href="{{ url_for('translate_page') }}"><i class="fas fa-language"></i> Translate</a>
+               <a href="{{ url_for('ai_help_page') }}" class="top-link {% if request.endpoint=='ai_help_page' %}active{% endif %}"><i class="fas fa-robot"></i><span>AI Help</span></a>
         </div>
         <button class="theme-toggle" id="themeToggle" title="Toggle light/dark"><i class="fas fa-adjust"></i></button>
         <div style="flex:1"></div>

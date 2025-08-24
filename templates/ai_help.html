@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>AI Assistance - PLM Analyzer</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;} body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#0b1324,#15273f);color:#e2e8f0;min-height:100vh;display:flex;flex-direction:column;} body[data-theme='light']{background:linear-gradient(120deg,#eff6ff,#f5f3ff);color:#1e293b;}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 18px;background:rgba(15,25,38,.85);backdrop-filter:blur(12px);border-bottom:1px solid #233547;position:sticky;top:0;z-index:50;} body[data-theme='light'] .topbar{background:rgba(255,255,255,.85);border-color:#cbd5e1;}
+.brand{font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:8px;} .brand i{color:#38bdf8;}
+.nav-links{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;} .nav-links a{font-size:.65rem;text-decoration:none;color:#94a3b8;padding:6px 10px;border-radius:8px;font-weight:600;letter-spacing:.5px;background:#1d2c41;border:1px solid #2f4259;transition:.25s;} .nav-links a:hover{background:#273b54;color:#fff;} body[data-theme='light'] .nav-links a{background:#f1f5f9;border-color:#cbd5e1;color:#475569;} body[data-theme='light'] .nav-links a:hover{background:#e2e8f0;color:#1e293b;}
+.layout{flex:1;display:flex;gap:14px;padding:18px;max-width:1800px;width:100%;margin:0 auto;flex-wrap:wrap;}
+.panel{flex:1 1 560px;display:flex;flex-direction:column;min-height:520px;background:linear-gradient(155deg,#1d2c41,#24354c);border:1px solid #2e445b;border-radius:18px;padding:18px 20px;position:relative;box-shadow:0 6px 20px -6px rgba(0,0,0,.55);} body[data-theme='light'] .panel{background:linear-gradient(155deg,#ffffff,#f1f5f9);border-color:#d0dae5;box-shadow:0 6px 18px -6px rgba(0,0,0,.12);} 
+.panel h2{font-size:.95rem;margin:0 0 8px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.desc{font-size:.63rem;line-height:1.35;color:#94a3b8;margin-bottom:12px;max-width:900px;} body[data-theme='light'] .desc{color:#64748b;}
+textarea,input{font-family:inherit;border:1px solid #2f4259;background:#0f1827;color:#e2e8f0;border-radius:10px;padding:12px 14px;font-size:.7rem;width:100%;resize:vertical;min-height:110px;} body[data-theme='light'] textarea, body[data-theme='light'] input{background:#f8fafc;color:#1e293b;border-color:#cbd5e1;}
+input{min-height:44px;}
+label{font-size:.6rem;font-weight:700;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:6px;color:#cbd5e1;text-transform:uppercase;} body[data-theme='light'] label{color:#475569;}
+.field{display:flex;flex-direction:column;margin-bottom:14px;}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
+button{border:none;cursor:pointer;font-weight:600;font-size:.65rem;letter-spacing:.6px;padding:14px 20px;border-radius:12px;display:inline-flex;align-items:center;gap:8px;position:relative;overflow:hidden;}
+.btn-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899);color:#fff;box-shadow:0 6px 18px -6px rgba(0,0,0,.6);} .btn-primary:hover{filter:brightness(1.07);} body[data-theme='light'] .btn-primary{box-shadow:0 6px 16px -6px rgba(79,70,229,.35);} 
+.btn-secondary{background:#1d2c41;color:#e2e8f0;border:1px solid #2f4259;} .btn-secondary:hover{background:#273b54;} body[data-theme='light'] .btn-secondary{background:#f1f5f9;color:#475569;border-color:#cbd5e1;} body[data-theme='light'] .btn-secondary:hover{background:#e2e8f0;}
+.output{flex:1;margin-top:12px;background:#0f1827;border:1px solid #2e445b;border-radius:14px;padding:14px 16px;overflow:auto;font-size:.65rem;line-height:1.35;white-space:pre-wrap;} body[data-theme='light'] .output{background:#f8fafc;color:#1e293b;border-color:#cbd5e1;}
+.split{display:flex;gap:12px;flex-wrap:wrap;}
+.half{flex:1 1 260px;}
+.badge-ai{font-size:.55rem;padding:6px 10px;border-radius:30px;background:linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899);font-weight:700;letter-spacing:.09em;color:#fff;}
+.toggle-theme{background:transparent;border:1px solid #2f4259;color:#94a3b8;padding:8px 12px;border-radius:10px;font-size:.65rem;margin-left:8px;} body[data-theme='light'] .toggle-theme{border-color:#cbd5e1;color:#475569;} .toggle-theme:hover{background:#1d2c41;color:#fff;} body[data-theme='light'] .toggle-theme:hover{background:#e2e8f0;color:#1e293b;}
+.placeholder{opacity:.6;font-style:italic;}
+.header-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.small-note{font-size:.55rem;color:#64748b;margin-top:4px;}
+@media (max-width:980px){.panel{min-height:unset;}}
+</style>
+</head>
+<body>
+    <div class="topbar">
+        <div class="brand"><i class="fas fa-robot"></i> <span>AI Assistance</span></div>
+        <div class="nav-links">
+            <a href="/" title="Logs">Logs</a>
+            <a href="/duplicate-finder" title="Duplicates">Duplicates</a>
+            <a href="/translate" title="Translate">Translate</a>
+            <a href="/ai_help" style="background:linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899);color:#fff;" title="AI Help">AI Help</a>
+        </div>
+        <button id="themeToggle" class="toggle-theme" title="Toggle theme"><i class="fas fa-adjust"></i></button>
+        {% if ai_mode %}<div class="badge-ai">AI MODE</div>{% endif %}
+    </div>
+    <div class="layout">
+        <!-- Problem + Logs Analysis Panel -->
+        <div class="panel" id="problemPanel">
+            <h2><i class="fas fa-microscope"></i> Problem & Log Analysis</h2>
+            <div class="desc">Provide a problem title, description, and related logs. An AI prompt (to be wired) will generate structured analysis: summary, log insights, root cause, source classification, and recommendations.</div>
+            <div class="field"><label for="pTitle"><i class="fas fa-heading"></i> Problem Title</label><input id="pTitle" placeholder="e.g. App crashes after login on Android 14" /></div>
+            <div class="field"><label for="pDesc"><i class="fas fa-align-left"></i> Problem Description</label><textarea id="pDesc" placeholder="Detailed steps, device model, frequency, expected vs actual..."></textarea></div>
+            <div class="field"><label for="pLogs"><i class="fas fa-file-code"></i> Logs</label><textarea id="pLogs" placeholder="Paste relevant logcat, crash stack, ANR traces, etc."></textarea></div>
+            <div class="actions">
+                <button class="btn-primary" id="analyzeBtn"><i class="fas fa-brain"></i> Generate Analysis</button>
+                <button class="btn-secondary" id="clearProblem"><i class="fas fa-eraser"></i> Clear</button>
+                <button class="btn-secondary" id="loadSample"><i class="fas fa-flask"></i> Sample Data</button>
+            </div>
+            <div class="output" id="analysisOutput"><span class="placeholder">Analysis output will appear here once implemented.</span></div>
+        </div>
+        <!-- Log Explanation Panel -->
+        <div class="panel" id="explainPanel">
+            <h2><i class="fas fa-book-open"></i> Log Explanation</h2>
+            <div class="desc">Paste raw log lines to get per-line human readable explanations, component mapping, keyword meaning, and intent classification (planned feature).</div>
+            <div class="field"><label for="eLogs"><i class="fas fa-terminal"></i> Logs</label><textarea id="eLogs" placeholder="Paste raw log lines here..."></textarea></div>
+            <div class="actions">
+                <button class="btn-primary" id="explainBtn"><i class="fas fa-comments"></i> Explain Logs</button>
+                <button class="btn-secondary" id="clearExplain"><i class="fas fa-eraser"></i> Clear</button>
+                <button class="btn-secondary" id="sampleExplain"><i class="fas fa-flask"></i> Sample Logs</button>
+            </div>
+            <div class="output" id="explainOutput"><span class="placeholder">Log explanation will appear here once implemented.</span></div>
+        </div>
+    </div>
+<script>
+// Theme
+(function(){const saved=localStorage.getItem('plmTheme'); if(saved) document.body.dataset.theme=saved;})();
+document.getElementById('themeToggle').addEventListener('click',()=>{const b=document.body;b.dataset.theme=b.dataset.theme==='light'?'dark':'light';localStorage.setItem('plmTheme',b.dataset.theme);});
+
+// Placeholder button interactions (no backend yet)
+document.getElementById('clearProblem').onclick=()=>{['pTitle','pDesc','pLogs'].forEach(id=>document.getElementById(id).value='');document.getElementById('analysisOutput').innerHTML='<span class="placeholder">Cleared.</span>';};
+document.getElementById('clearExplain').onclick=()=>{document.getElementById('eLogs').value='';document.getElementById('explainOutput').innerHTML='<span class="placeholder">Cleared.</span>';};
+
+document.getElementById('loadSample').onclick=()=>{
+ document.getElementById('pTitle').value='Camera app ANR after switching modes';
+ document.getElementById('pDesc').value='User reports the stock camera freezes when switching from photo to video after recent OTA. Occurs intermittently on Galaxy S23 (Android 14).';
+ document.getElementById('pLogs').value='07-24 10:14:28.456  2210  2210 E ActivityManager: ANR in com.android.camera (pid 5421)\n07-24 10:14:28.456  2210  2210 E ActivityManager: Reason: Input dispatching timed out (App froze switching Surface)\n07-24 10:14:28.457  2210  2235 I WindowManager: Focus moving away from com.android.camera\n07-24 10:14:28.472  2210  5578 E InputDispatcher: Application is not responding: Window{d1a com.android.camera}.  It has been 5006.9ms since event, 5006.9ms since wait started.';
+};
+
+document.getElementById('sampleExplain').onclick=()=>{
+ document.getElementById('eLogs').value='07-24 10:14:28.456 2210 2210 E ActivityManager: ANR in com.android.camera (pid 5421)\n07-24 10:14:28.472 2210 5578 E InputDispatcher: Application is not responding';
+};
+
+document.getElementById('analyzeBtn').onclick=()=>{
+ const title=document.getElementById('pTitle').value.trim();
+ const desc=document.getElementById('pDesc').value.trim();
+ const logs=document.getElementById('pLogs').value.trim();
+ if(!title||!desc||!logs){document.getElementById('analysisOutput').innerHTML='<span class="placeholder">Please provide title, description, and logs.</span>';return;}
+ document.getElementById('analysisOutput').innerHTML='<span class="placeholder">[Future] Will send prompt to backend LLM.\nPreview prompt size: '+(title.length+desc.length+logs.length)+' chars.</span>';
+};
+
+document.getElementById('explainBtn').onclick=()=>{
+ const logs=document.getElementById('eLogs').value.trim();
+ if(!logs){document.getElementById('explainOutput').innerHTML='<span class="placeholder">Provide logs first.</span>';return;}
+ const lines=logs.split(/\r?\n/).filter(l=>l.trim());
+ document.getElementById('explainOutput').innerHTML='<span class="placeholder">[Future] Will explain '+lines.length+' lines via AI.</span>';
+};
+</script>
+</body>
+</html>
