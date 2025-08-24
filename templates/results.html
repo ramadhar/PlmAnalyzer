@@ -7,56 +7,48 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-
-    .layout{display:flex;height:100vh;width:100vw;max-width:100%;}
-    .sidebar{width:240px;background:#1f2937;color:#f3f4f6;display:flex;flex-direction:column;padding:12px;overflow-y:auto;}
-        .sidebar-header h2{font-size:1.1rem;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
-        .sidebar-section{margin-bottom:14px;}
-        .sidebar-section label{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:#9ca3af;display:block;margin-bottom:4px;}
-    .side-select{width:100%;padding:6px 8px;border:1px solid #374151;border-radius:4px;background:#111827;color:#f9fafb;font-size:.85rem;}
-    .side-select option{background:#f1f5f9;color:#0f172a;}
-        .side-select:focus{outline:none;border-color:#6366f1;}
-        .primary-btn{background:#6366f1;border:none;color:#fff;padding:8px 10px;border-radius:4px;font-size:.8rem;font-weight:600;cursor:pointer;}
-        .secondary-btn{background:#10b981;border:none;color:#fff;padding:6px 10px;border-radius:4px;font-size:.75rem;font-weight:600;cursor:pointer;}
-        .back-link{margin-top:auto;display:inline-flex;align-items:center;gap:6px;color:#9ca3af;text-decoration:none;font-size:.75rem;padding:6px 0;}
-        .back-link:hover{color:#fff;}
-        .metrics-body{font-size:.65rem;line-height:1.3;white-space:pre-line;background:#111827;border:1px solid #374151;padding:6px;border-radius:4px;max-height:140px;overflow:auto;}
-        .compare-output{background:#111827;color:#f9fafb;font-size:.6rem;border:1px solid #374151;margin-top:6px;padding:6px;border-radius:4px;max-height:120px;overflow:auto;}
-        .main-pane{flex:1;display:flex;flex-direction:row;overflow:hidden;}
-    .logs-pane{flex:0 0 42%;display:flex;flex-direction:column;border-right:1px solid #1e293b;background:#0f172a;min-height:0;}
-    .analysis-pane{flex:1;display:flex;flex-direction:column;background:#ffffff;overflow:hidden;}
-        .pane-header{padding:8px 12px;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;background:#334155;color:#e2e8f0;display:flex;align-items:center;gap:6px;}
-    .code-view{flex:1 1 auto;margin:0;padding:12px;font-family:Consolas,Monaco,monospace;font-size:12px;line-height:1.35;overflow-y:scroll;overflow-x:auto;white-space:pre;color:#e2e8f0;background:#0f172a;min-height:0;}
-        .matches-scroll{flex:1;overflow-y:scroll;overflow-x:hidden;padding:10px;background:#f1f5f9;}
-        /* Always-visible custom scrollbars */
-        .code-view::-webkit-scrollbar, .matches-scroll::-webkit-scrollbar { width:10px; }
-        .code-view::-webkit-scrollbar-track, .matches-scroll::-webkit-scrollbar-track { background:#1e293b; }
-        .code-view::-webkit-scrollbar-thumb { background:#475569; border-radius:6px; }
-        .matches-scroll::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:6px; }
-        .code-view:hover::-webkit-scrollbar-thumb { background:#64748b; }
-        .matches-scroll:hover::-webkit-scrollbar-thumb { background:#94a3b8; }
-        /* Firefox */
-        .code-view, .matches-scroll { scrollbar-width:thin; scrollbar-color:#475569 #1e293b; }
-        .match-block{background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:8px;margin-bottom:8px;font-family:Consolas,monospace;}
-        .match-title{font-size:.7rem;font-weight:600;color:#334155;margin-bottom:4px;}
-    .match-context{margin:0;font-size:.65rem;white-space:pre;line-height:1.25;background:#1e293b;color:#e2e8f0;padding:6px;border-radius:4px;}
-        .no-matches{font-size:.75rem;color:#64748b;font-style:italic;}
-        .root-cause-box{border-top:1px solid #cbd5e1;padding:10px;background:#fafafa;}
-        .rc-title{font-size:.7rem;font-weight:700;color:#475569;display:flex;align-items:center;gap:6px;margin-bottom:4px;}
-        .rc-text{margin:0;font-size:.65rem;white-space:pre-wrap;line-height:1.3;background:#fff;border:1px solid #e2e8f0;padding:6px;border-radius:4px;max-height:180px;overflow:auto;}
-        .timestamp{font-size:.6rem;color:#94a3b8;padding:6px 10px;}
+    :root { /* reuse index design tokens */
+        --footer-h:48px; --font-sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+        --bg-gradient:linear-gradient(135deg,#0b1324 0%,#12263d 55%,#182f49 100%);
+        --color-bg:#0e1827; --color-bg-alt:#172537; --color-surface:#1d2c41; --color-surface-alt:#24344b;
+        --color-border:#32475d; --color-border-strong:#4a627b; --color-text:#e3e9f2; --color-text-soft:#94a3b8;
+        --color-accent:#6366f1; --color-accent-grad:linear-gradient(135deg,#6366f1 0%,#8b5cf6 55%,#ec4899 110%);
+        --color-danger:#ef4444; --color-warning:#f59e0b; --color-success:#10b981;
+        --radius-xs:4px; --radius-sm:8px; --radius-md:12px; --radius-lg:18px; --radius-pill:999px;
+        --shadow-sm:0 2px 4px -1px rgba(0,0,0,.4); --shadow-md:0 4px 14px -2px rgba(0,0,0,.45); --shadow-lg:0 8px 28px -4px rgba(0,0,0,.55);
+        --transition-base:.18s cubic-bezier(.4,0,.2,1);
+    }
+    body {font-family:var(--font-sans);background:var(--bg-gradient);color:var(--color-text);min-height:100vh;}
+    * {margin:0;padding:0;box-sizing:border-box;}
+    .topbar {display:flex;align-items:center;gap:14px;background:rgba(20,30,46,.78);backdrop-filter:blur(14px);padding:6px 16px;border-radius:0 0 14px 14px;box-shadow:0 4px 14px rgba(0,0,0,.45);border:1px solid #203348;border-top:none;}
+    .brand {display:flex;align-items:center;font-size:1rem;font-weight:600;color:var(--color-text);gap:8px;width:220px;}
+    .brand i{color:#38bdf8;}
+    .top-link {display:flex;align-items:center;gap:6px;color:var(--color-text-soft);text-decoration:none;font-size:.66rem;font-weight:600;padding:6px 10px;border-radius:8px;transition:background var(--transition-base),color var(--transition-base);letter-spacing:.5px;}
+    .top-link:hover {background:#1e293b;color:#fff;}
+    .top-link.active {background:var(--color-accent-grad);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.4);}        
+    .layout {display:flex;height:calc(100vh - 60px);width:100%;}
+    .sidebar {width:260px;background:linear-gradient(165deg,var(--color-surface) 0%,var(--color-surface-alt) 120%);color:var(--color-text);display:flex;flex-direction:column;padding:14px 16px;overflow-y:auto;border-right:1px solid var(--color-border);}
+    .sidebar-header h2{font-size:1rem;margin-bottom:12px;display:flex;align-items:center;gap:6px;font-weight:600;letter-spacing:.5px;}
+    .sidebar-section{margin-bottom:16px;}
+    .sidebar-section label{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;font-weight:600;color:var(--color-text-soft);margin-bottom:6px;display:block;}
+    .side-select{width:100%;padding:8px 10px;border:1px solid var(--color-border);border-radius:8px;background:var(--color-bg-alt);color:var(--color-text);font-size:.7rem;}
+    .side-select:focus{outline:none;border-color:var(--color-accent);}
+    .primary-btn{background:var(--color-accent-grad);border:none;color:#fff;padding:9px 12px;border-radius:8px;font-size:.7rem;font-weight:600;cursor:pointer;box-shadow:var(--shadow-sm);letter-spacing:.6px;}
+    .primary-btn:disabled{opacity:.6;cursor:wait;}
+    .back-link{margin-top:auto;display:inline-flex;align-items:center;gap:6px;color:var(--color-text-soft);text-decoration:none;font-size:.65rem;padding:6px 0;}
+    .back-link:hover{color:#fff;}
+    .issue-type{background:var(--color-accent-grad);padding:4px 10px;border-radius:var(--radius-pill);font-size:.55rem;display:inline-block;}
+    .main-pane{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:10px 14px 18px 14px;}
+    .logs-pane{flex:1;display:flex;flex-direction:column;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);padding:0;overflow:hidden;}
+    .pane-header{padding:10px 16px;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;background:var(--color-bg-alt);color:var(--color-text);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--color-border);}
+    .code-view{flex:1;margin:0;padding:14px 16px;font-family:Consolas,Monaco,monospace;font-size:12px;line-height:1.34;overflow:auto;white-space:pre;background:#000;color:#d1d5db;}
+    .code-view::-webkit-scrollbar{width:10px;} .code-view::-webkit-scrollbar-track{background:#1e293b;} .code-view::-webkit-scrollbar-thumb{background:#475569;border-radius:6px;} .code-view:hover::-webkit-scrollbar-thumb{background:#64748b;}
+    .root-cause-box{border-top:1px solid var(--color-border);padding:12px 16px;background:var(--color-surface-alt);} 
+    .rc-title{font-size:.6rem;font-weight:700;letter-spacing:.08em;margin-bottom:6px;color:var(--color-text-soft);display:flex;align-items:center;gap:6px;}
+    .rc-text{margin:0;font-size:.65rem;white-space:pre-wrap;line-height:1.35;background:#0f1827;color:var(--color-text);border:1px solid var(--color-border);padding:10px 12px;border-radius:8px;max-height:220px;overflow:auto;}
+    .timestamp{font-size:.55rem;color:var(--color-text-soft);padding:6px 16px 12px 16px;}
+    @media (max-width:960px){.layout{flex-direction:column;} .sidebar{width:100%;flex-direction:row;flex-wrap:wrap;border-right:none;border-bottom:1px solid var(--color-border);} .main-pane{padding:10px;} .sidebar-section{width:160px;margin-right:10px;} .back-link{margin-top:12px;}}
+    </style>
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -306,6 +298,16 @@
     </style>
 </head>
 <body>
+    <div class="topbar">
+        <div class="brand"><i class="fas fa-microscope"></i><span class="brand-text">PLM Analyzer</span></div>
+        <nav class="top-nav" style="display:flex;gap:4px;">
+            <a href="/" class="top-link"><i class="fas fa-upload"></i> Upload</a>
+            <a href="/duplicate-finder" class="top-link"><i class="fas fa-clone"></i> Duplicates</a>
+            <a href="/ai_help" class="top-link"><i class="fas fa-robot"></i> AI Help</a>
+            <a href="/smart" class="top-link"><i class="fas fa-shield-alt"></i> Smart Detect</a>
+            <span class="top-link active"><i class="fas fa-bug"></i> Issues</span>
+        </nav>
+    </div>
     <div class="layout">
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -332,17 +334,14 @@
             <a href="{{ url_for('index') }}" class="back-link"><i class="fas fa-arrow-left"></i> New Upload</a>
         </aside>
         <main class="main-pane">
-            <section class="logs-pane" style="flex:1;display:flex;flex-direction:column;">
-                <div class="pane-header" style="gap:12px;"><i class="fas fa-file-alt"></i>
-                    <span id="log_view_title">Issue Logs</span>
-                    <div style="margin-left:auto;display:flex;gap:6px;"></div>
-                </div>
-                <pre class="code-view" id="raw_log_pre" style="position:relative;flex:1;">{{ result.preview_log if result.preview_log else 'No relevant log lines extracted for this issue.' }}</pre>
-                <div class="root-cause-box" style="margin-top:12px;">
+            <section class="logs-pane">
+                <div class="pane-header"><i class="fas fa-file-alt"></i><span id="log_view_title">Issue Logs</span></div>
+                <pre class="code-view" id="raw_log_pre">{{ result.preview_log if result.preview_log else 'No relevant log lines extracted for this issue.' }}</pre>
+                <div class="root-cause-box">
                     <div class="rc-title"><i class="fas fa-lightbulb"></i> Root Cause</div>
                     <pre class="rc-text">{{ result.root_cause }}</pre>
                 </div>
-                <div class="timestamp" style="margin-top:8px;">Completed: {{ result.timestamp }}</div>
+                <div class="timestamp">Completed: {{ result.timestamp }}</div>
             </section>
         </main>
     </div>
