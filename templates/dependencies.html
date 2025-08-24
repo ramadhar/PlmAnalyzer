@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Dependency Manager - PLM Analyzer</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{font-family:'Inter',sans-serif;margin:0;padding:0;background:linear-gradient(135deg,#0b1324,#15273f);color:#e2e8f0;}
+body[data-theme='light']{background:linear-gradient(120deg,#eff6ff,#f5f3ff);color:#1e293b;}
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 18px;background:rgba(15,25,38,.85);backdrop-filter:blur(12px);border-bottom:1px solid #223547;}
+body[data-theme='light'] .topbar{background:rgba(255,255,255,.85);border-color:#cbd5e1;}
+.topbar a{color:inherit;text-decoration:none;font-weight:600;font-size:.8rem;}
+.title{font-size:1.05rem;font-weight:600;display:flex;align-items:center;gap:8px;}
+.wrap{max-width:1180px;margin:20px auto;padding:0 18px 60px;}
+.panel{background:linear-gradient(155deg,#1d2c41,#24354c);padding:18px 20px;border:1px solid #2e445b;border-radius:14px;margin-bottom:18px;box-shadow:0 4px 14px -4px rgba(0,0,0,.5);} 
+body[data-theme='light'] .panel{background:linear-gradient(145deg,#ffffff,#f1f5f9);border-color:#cbd5e1;box-shadow:0 4px 14px -4px rgba(0,0,0,.08);} 
+table{width:100%;border-collapse:collapse;font-size:.72rem;}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #2e445b;}
+body[data-theme='light'] th,body[data-theme='light'] td{border-color:#e2e8f0;}
+th{font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#94a3b8;}
+body[data-theme='light'] th{color:#64748b;}
+tr:hover td{background:rgba(255,255,255,.04);} body[data-theme='light'] tr:hover td{background:#f1f5f9;}
+.status-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:14px;font-size:.55rem;font-weight:600;letter-spacing:.05em;}
+.ok{background:linear-gradient(135deg,#059669,#10b981);color:#ecfdf5;}
+.miss{background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff;}
+.upd{background:linear-gradient(135deg,#d97706,#f59e0b);color:#fff;}
+button.action{border:none;border-radius:8px;padding:6px 12px;font-size:.65rem;font-weight:600;cursor:pointer;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 6px rgba(0,0,0,.4);} 
+button.action:hover{filter:brightness(1.08);} button.action:disabled{opacity:.5;cursor:not-allowed;}
+.actions-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.log-box{white-space:pre-wrap;background:#0f172a;color:#cbd5e1;font-size:.62rem;padding:12px;border-radius:10px;max-height:260px;overflow:auto;border:1px solid #233547;margin-top:12px;}
+body[data-theme='light'] .log-box{background:#f8fafc;color:#475569;border-color:#cbd5e1;}
+.small-note{font-size:.6rem;color:#94a3b8;margin-top:6px;line-height:1.4;} body[data-theme='light'] .small-note{color:#64748b;}
+.theme-toggle{margin-left:auto;background:transparent;border:1px solid #2e445b;color:inherit;border-radius:8px;padding:6px 10px;font-size:.65rem;cursor:pointer;} body[data-theme='light'] .theme-toggle{border-color:#cbd5e1;}
+.theme-toggle:hover{background:rgba(255,255,255,.08);} body[data-theme='light'] .theme-toggle:hover{background:#e2e8f0;}
+</style>
+</head>
+<body>
+    <div class="topbar">
+        <div class="title"><i class="fas fa-boxes"></i> Dependency Manager</div>
+        <a href="{{ url_for('index') }}" title="Back to main">&larr; Back</a>
+        <button id="themeToggle" class="theme-toggle"><i class="fas fa-adjust"></i></button>
+    </div>
+    <div class="wrap">
+        <div class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                <h3 style="margin:0;font-size:.9rem;">Manage Required Python Packages</h3>
+                {% if ai_mode %}<div style="font-size:.55rem;padding:6px 10px;border-radius:20px;background:linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899);letter-spacing:.12em;font-weight:700;">AI MODE</div>{% endif %}
+            </div>
+            <p style="font-size:.65rem;line-height:1.4;margin:10px 0 14px;">This panel lets you install missing dependencies, update versions, remove unused packages, and upgrade pip. It will attempt online installation first then fallback to your offline bundle (if a site is blocked in your network).</p>
+            <div class="actions-bar">
+                <button class="action" id="btnRefresh"><i class="fas fa-sync"></i> Refresh Status</button>
+                <button class="action" id="btnInstallMissing"><i class="fas fa-download"></i> Install Missing</button>
+                <button class="action" id="btnUpdateAll"><i class="fas fa-arrow-up"></i> Update All</button>
+                <button class="action" id="btnUpdatePip"><i class="fas fa-wrench"></i> Upgrade pip</button>
+                <button class="action" id="btnClearLog"><i class="fas fa-eraser"></i> Clear Log</button>
+            </div>
+            <div style="overflow:auto;max-height:420px;border:1px solid #2e445b;border-radius:12px;">
+                <table id="depTable">
+                    <thead>
+                        <tr>
+                            <th>Package</th>
+                            <th>Spec</th>
+                            <th>Installed</th>
+                            <th>Installed Version</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="small-note">Remove only if you are sure it's not needed. After removal you can re-install via Install Missing.</div>
+            <div class="log-box" id="opLog" aria-label="Operation log" role="log"></div>
+        </div>
+    </div>
+<script>
+// Theme persistence
+(function(){const saved=localStorage.getItem('plmTheme'); if(saved) document.body.dataset.theme=saved;})();
+document.getElementById('themeToggle').addEventListener('click',()=>{const b=document.body; b.dataset.theme=b.dataset.theme==='light'?'dark':'light';localStorage.setItem('plmTheme',b.dataset.theme);});
+
+const depTableBody = document.querySelector('#depTable tbody');
+const logBox = document.getElementById('opLog');
+function log(msg){const ts=new Date().toLocaleTimeString();logBox.textContent += '['+ts+'] '+msg+'\n';logBox.scrollTop=logBox.scrollHeight;}
+function setBusy(disabled){document.querySelectorAll('button.action').forEach(b=>b.disabled=disabled);}
+
+async function fetchStatus(){
+    setBusy(true); log('Fetching dependency status...');
+    try{const r=await fetch('/api/dependencies/status'); const j=await r.json(); renderStatus(j.packages||[]); log('Status loaded.'); }
+    catch(e){log('Failed to fetch status: '+e);} finally{setBusy(false);} }
+
+function renderStatus(pkgs){
+    depTableBody.innerHTML='';
+    pkgs.forEach(p=>{
+        const tr=document.createElement('tr');
+        const status = !p.installed?'<span class="status-pill miss">Missing</span>':(p.needs_update?'<span class="status-pill upd">Update</span>':'<span class="status-pill ok">OK</span>');
+        tr.innerHTML = `<td>${p.name}</td><td>${p.spec}</td><td>${p.installed? 'Yes':'No'}</td><td>${p.installed_version||'-'}</td><td>${status}</td><td>${actionButtons(p)}</td>`;
+        depTableBody.appendChild(tr);
+    });
+}
+
+function actionButtons(p){
+    if(!p.installed) return '<button class="action" data-act="install_one" data-pkg="'+p.spec+'" style="background:linear-gradient(135deg,#059669,#10b981);"><i class="fas fa-download"></i></button>';
+    return '<button class="action" data-act="remove" data-pkg="'+p.name+'" style="background:linear-gradient(135deg,#dc2626,#ef4444);"><i class="fas fa-times"></i></button>';
+}
+
+depTableBody.addEventListener('click', async e=>{
+    const btn=e.target.closest('button.action'); if(!btn) return; const act=btn.dataset.act; const pkg=btn.dataset.pkg; if(act==='remove'){ if(!confirm('Remove '+pkg+' ?')) return; await runAction('remove', pkg); } else if(act==='install_one'){ await runAction('install_missing'); }
+});
+
+async function runAction(action, packageName){
+    setBusy(true); log('Running action '+action+(packageName?' on '+packageName:''));
+    try{
+        const r=await fetch('/api/dependencies/action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:action, package:packageName})});
+        const j=await r.json();
+        if(r.ok){renderStatus(j.packages||[]);log('Action '+action+' finished rc='+j.rc);} else {log('Error: '+(j.error||r.status));}
+        if(j.output) log(j.output.substring(0,12000));
+    }catch(e){log('Failed action '+action+': '+e);} finally{setBusy(false);} }
+
+document.getElementById('btnRefresh').addEventListener('click', fetchStatus);
+document.getElementById('btnInstallMissing').addEventListener('click', ()=>runAction('install_missing'));
+document.getElementById('btnUpdateAll').addEventListener('click', ()=>runAction('update_all'));
+document.getElementById('btnUpdatePip').addEventListener('click', ()=>runAction('update_pip'));
+document.getElementById('btnClearLog').addEventListener('click', ()=>{logBox.textContent='';});
+
+fetchStatus();
+</script>
+</body>
+</html>

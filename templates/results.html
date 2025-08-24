@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results - PLM Log Analyzer</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+    .layout{display:flex;height:100vh;width:100vw;max-width:100%;}
+    .sidebar{width:240px;background:#1f2937;color:#f3f4f6;display:flex;flex-direction:column;padding:12px;overflow-y:auto;}
+        .sidebar-header h2{font-size:1.1rem;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+        .sidebar-section{margin-bottom:14px;}
+        .sidebar-section label{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:#9ca3af;display:block;margin-bottom:4px;}
+    .side-select{width:100%;padding:6px 8px;border:1px solid #374151;border-radius:4px;background:#111827;color:#f9fafb;font-size:.85rem;}
+    .side-select option{background:#f1f5f9;color:#0f172a;}
+        .side-select:focus{outline:none;border-color:#6366f1;}
+        .primary-btn{background:#6366f1;border:none;color:#fff;padding:8px 10px;border-radius:4px;font-size:.8rem;font-weight:600;cursor:pointer;}
+        .secondary-btn{background:#10b981;border:none;color:#fff;padding:6px 10px;border-radius:4px;font-size:.75rem;font-weight:600;cursor:pointer;}
+        .back-link{margin-top:auto;display:inline-flex;align-items:center;gap:6px;color:#9ca3af;text-decoration:none;font-size:.75rem;padding:6px 0;}
+        .back-link:hover{color:#fff;}
+        .metrics-body{font-size:.65rem;line-height:1.3;white-space:pre-line;background:#111827;border:1px solid #374151;padding:6px;border-radius:4px;max-height:140px;overflow:auto;}
+        .compare-output{background:#111827;color:#f9fafb;font-size:.6rem;border:1px solid #374151;margin-top:6px;padding:6px;border-radius:4px;max-height:120px;overflow:auto;}
+        .main-pane{flex:1;display:flex;flex-direction:row;overflow:hidden;}
+    .logs-pane{flex:0 0 42%;display:flex;flex-direction:column;border-right:1px solid #1e293b;background:#0f172a;min-height:0;}
+    .analysis-pane{flex:1;display:flex;flex-direction:column;background:#ffffff;overflow:hidden;}
+        .pane-header{padding:8px 12px;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;background:#334155;color:#e2e8f0;display:flex;align-items:center;gap:6px;}
+    .code-view{flex:1 1 auto;margin:0;padding:12px;font-family:Consolas,Monaco,monospace;font-size:12px;line-height:1.35;overflow-y:scroll;overflow-x:auto;white-space:pre;color:#e2e8f0;background:#0f172a;min-height:0;}
+        .matches-scroll{flex:1;overflow-y:scroll;overflow-x:hidden;padding:10px;background:#f1f5f9;}
+        /* Always-visible custom scrollbars */
+        .code-view::-webkit-scrollbar, .matches-scroll::-webkit-scrollbar { width:10px; }
+        .code-view::-webkit-scrollbar-track, .matches-scroll::-webkit-scrollbar-track { background:#1e293b; }
+        .code-view::-webkit-scrollbar-thumb { background:#475569; border-radius:6px; }
+        .matches-scroll::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:6px; }
+        .code-view:hover::-webkit-scrollbar-thumb { background:#64748b; }
+        .matches-scroll:hover::-webkit-scrollbar-thumb { background:#94a3b8; }
+        /* Firefox */
+        .code-view, .matches-scroll { scrollbar-width:thin; scrollbar-color:#475569 #1e293b; }
+        .match-block{background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:8px;margin-bottom:8px;font-family:Consolas,monospace;}
+        .match-title{font-size:.7rem;font-weight:600;color:#334155;margin-bottom:4px;}
+    .match-context{margin:0;font-size:.65rem;white-space:pre;line-height:1.25;background:#1e293b;color:#e2e8f0;padding:6px;border-radius:4px;}
+        .no-matches{font-size:.75rem;color:#64748b;font-style:italic;}
+        .root-cause-box{border-top:1px solid #cbd5e1;padding:10px;background:#fafafa;}
+        .rc-title{font-size:.7rem;font-weight:700;color:#475569;display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+        .rc-text{margin:0;font-size:.65rem;white-space:pre-wrap;line-height:1.3;background:#fff;border:1px solid #e2e8f0;padding:6px;border-radius:4px;max-height:180px;overflow:auto;}
+        .timestamp{font-size:.6rem;color:#94a3b8;padding:6px 10px;}
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .back-btn i {
+            margin-right: 8px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 25px;
+            transition: transform 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .result-card h3 {
+            color: #374151;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .result-card h3 i {
+            margin-right: 10px;
+            color: #667eea;
+        }
+
+        .issue-type {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .issue-scores {
+            margin-bottom: 20px;
+        }
+
+        .issue-score {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .issue-score:last-child {
+            border-bottom: none;
+        }
+
+        .score-bar {
+            background: #e5e7eb;
+            height: 8px;
+            border-radius: 4px;
+            flex: 1;
+            margin: 0 15px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .score-value {
+            font-weight: 600;
+            color: #374151;
+            min-width: 30px;
+            text-align: right;
+        }
+
+        .log-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .log-section h3 {
+            color: #374151;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .log-section h3 i {
+            margin-right: 10px;
+            color: #667eea;
+        }
+
+        .log-entry {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .log-entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .line-number {
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .matched-line {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 8px;
+            margin: 10px 0;
+            font-weight: 600;
+            color: #92400e;
+        }
+
+        .context-lines {
+            color: #6b7280;
+            font-size: 0.85rem;
+            white-space: pre-wrap; /* preserve original line breaks */
+        }
+
+        .root-cause {
+            background: #ecfdf5;
+            border: 1px solid #10b981;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .root-cause h4 {
+            color: #065f46;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .root-cause p {
+            color: #047857;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+
+        .timestamp {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .result-card, .log-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-bug"></i> Issues</h2>
+            </div>
+            <div class="sidebar-section">
+                <label>Main Issue</label>
+                <select id="switch_main" class="side-select"></select>
+            </div>
+            <div class="sidebar-section">
+                <label>Sub Issue</label>
+                <select id="switch_sub" class="side-select"></select>
+            </div>
+            <button id="switch_btn" class="primary-btn" style="margin-top:6px;">Load Issue</button>
+            <hr />
+            <div class="sidebar-section small-info">
+                <div><strong>Selected:</strong><br><span class="issue-type">{{ result.selected_issue }}</span></div>
+                <div style="margin-top:8px;"><strong>Method:</strong><br>{{ result.analysis_method }}</div>
+                <div style="margin-top:8px;"><strong>Package:</strong><br>{{ result.package_name if result.package_name else 'All' }}</div>
+            </div>
+            {% if result.log_id %}
+            <div class="sidebar-section" id="metrics_panel">
+                <label style="margin-bottom:4px;font-weight:600;">Metrics</label>
+                <div id="metrics_body" class="metrics-body">Loading...</div>
+            </div>
+            <div class="sidebar-section" id="compare_panel">
+                <label style="margin-bottom:4px;font-weight:600;">Compare</label>
+                <select id="cmp_a_main" class="side-select compact"></select>
+                <select id="cmp_a_sub" class="side-select compact"></select>
+                <select id="cmp_b_main" class="side-select compact"></select>
+                <select id="cmp_b_sub" class="side-select compact"></select>
+                <button id="compare_btn" class="secondary-btn" style="margin-top:6px;">Compare</button>
+                <pre id="compare_result" class="compare-output"></pre>
+            </div>
+            {% endif %}
+            <a href="{{ url_for('index') }}" class="back-link"><i class="fas fa-arrow-left"></i> New Upload</a>
+        </aside>
+        <main class="main-pane">
+            <section class="logs-pane">
+                <div class="pane-header" style="gap:12px;"><i class="fas fa-file-alt"></i>
+                    <span id="log_view_title">{% if result.eager_mode %}Preview{% else %}Issue Logs{% endif %}</span>
+                    <div style="margin-left:auto;display:flex;gap:6px;">
+                        {% if result.eager_mode %}
+                        <button id="btn_show_preview" style="background:#1e293b;color:#e2e8f0;border:1px solid #475569;font-size:.6rem;padding:4px 8px;border-radius:4px;cursor:pointer;">Preview</button>
+                        <button id="btn_show_summary" style="background:#334155;color:#e2e8f0;border:1px solid #475569;font-size:.6rem;padding:4px 8px;border-radius:4px;cursor:pointer;">Summary</button>
+                        <a href="/raw_log/{{ result.log_id }}" target="_blank" style="align-self:center;font-size:.6rem;color:#bae6fd;text-decoration:none;padding-top:1px;">Full</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <pre class="code-view" id="raw_log_pre" style="position:relative;">{{ result.preview_log if result.preview_log else 'No relevant log lines extracted for this issue.' }}</pre>
+            </section>
+            <section class="analysis-pane">
+                <div class="pane-header"><i class="fas fa-search"></i> {% if result.single_stack %}System Fatal Stack{% else %}Relevant Matches ({{ result.relevant_logs|length }}){% endif %}</div>
+                <div class="matches-scroll" id="matches_container">
+                {% if result.relevant_logs %}
+                    {% for log_entry in result.relevant_logs %}
+                    <div class="match-block">
+                        <div class="match-title">Line {{ log_entry.line_number }}{% if log_entry.keyword %} • {{ log_entry.keyword }}{% endif %}</div>
+                        <pre class="match-context">{{ log_entry.matched_line }}</pre>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-matches">No matches for selected issue.</div>
+                {% endif %}
+                </div>
+                <div class="root-cause-box">
+                    <div class="rc-title"><i class="fas fa-lightbulb"></i> Root Cause</div>
+                    <pre class="rc-text">{{ result.root_cause }}</pre>
+                </div>
+                <div class="timestamp">Completed: {{ result.timestamp }}</div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+    const logId = "{{ result.log_id if result.log_id else '' }}";
+    // Embed JSON safely as string then parse
+    const issueMap = JSON.parse(`{{ (result.all_issue_types | tojson | safe) if result.all_issue_types else '{}' }}`);
+    const currentMain = '{{ result.main_issue_type }}';
+    const currentSub = '{{ result.sub_issue_type }}';
+
+        function populateMain() {
+            const mainSel = document.getElementById('switch_main');
+            if(!mainSel) return;
+            mainSel.innerHTML='';
+            Object.keys(issueMap).forEach(k=>{
+                const o=document.createElement('option');o.value=k;o.textContent=k;if(k===currentMain)o.selected=true;mainSel.appendChild(o);
+            });
+            populateSub();
+        }
+        function populateSub(){
+            const mainSel=document.getElementById('switch_main');
+            const subSel=document.getElementById('switch_sub');
+            if(!mainSel||!subSel)return;subSel.innerHTML='';
+            (issueMap[mainSel.value]||[]).forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;if(mainSel.value===currentMain && s===currentSub)o.selected=true;subSel.appendChild(o);});
+        }
+        document.addEventListener('change',e=>{if(e.target&&e.target.id==='switch_main'){populateSub();}});
+        document.addEventListener('click',e=>{
+            if(e.target&&e.target.id==='switch_btn'){
+                const m=document.getElementById('switch_main').value;
+                const s=document.getElementById('switch_sub').value;
+                if(!logId)return; e.target.disabled=true; e.target.textContent='Loading...';
+                fetch("{{ url_for('switch_issue') }}", {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({log_id:logId, main_issue_type:m, sub_issue_type:s})})
+                    .then(r=>r.json()).then(data=>{
+                        if(data.error){alert(data.error);} else {
+                            const selEl=document.querySelector('.issue-type'); if(selEl){ selEl.textContent=data.selected_issue; }
+                            const section=document.querySelectorAll('.log-section')[0];
+                            if(section){
+                                let html='';
+                                if(data.relevant_logs&&data.relevant_logs.length){
+                                    if(data.single_stack){html+='<h3><i class="fas fa-search"></i> Last System Fatal Stack Trace</h3>';}
+                                    else {html+=`<h3><i class=\"fas fa-search\"></i> Relevant Log Entries (${data.relevant_logs.length} found)</h3>`;}
+                                    data.relevant_logs.forEach(le=>{
+                                        html+='<div class="log-entry">';
+                                        html+='<div class="log-entry-header">';
+                                        html+=`<span class=\"line-number\">Line ${le.line_number||''}</span>`;
+                                        if(!data.single_stack){html+='<span style=\"color:#6b7280;font-size:0.8rem;\">Context</span>';}
+                                        html+='</div>';
+                                        html+=`<div class=\"matched-line\">${(le.matched_line||'').replace(/</g,'&lt;')}</div>`;
+                                        if(le.context){const esc=le.context.map(l=>l.replace(/</g,'&lt;')).join('\n');html+=`<pre class=\"context-lines\">${esc}</pre>`;}
+                                        html+='</div>';
+                                    });
+                                } else {html+='<h3><i class="fas fa-search"></i> Relevant Log Entries (0 found)</h3><p style="color:#6b7280;font-style:italic;">No specific log entries matched the issue patterns.</p>';}
+                                section.innerHTML=html;
+                            }
+                            const rc=document.querySelector('.root-cause p'); if(rc){rc.textContent=data.root_cause||'';}
+                            // Update analysis-only preview in lazy mode or when preview toggle absent
+                            const pre=document.getElementById('raw_log_pre');
+                            if(pre && !document.getElementById('btn_show_preview')){
+                                pre.textContent = data.preview_log || 'No relevant log lines extracted for this issue.';
+                            }
+                        }
+                    }).catch(err=>alert(err)).finally(()=>{e.target.disabled=false;e.target.textContent='Load Selected Issue';});
+            }
+        });
+        // Animate bars (if present)
+    document.addEventListener('DOMContentLoaded',()=>{try{populateMain();}catch(e){console.error('Populate main failed',e);}});
+        // Metrics & Compare logic
+        function renderMetrics(data){
+            const body=document.getElementById('metrics_body'); if(!body) return;
+            const m=data.metrics||{}; let html='';
+            Object.keys(m).sort().forEach(main=>{
+                const obj=m[main];
+                const total=obj.total_expected || (issueMap[main]?issueMap[main].length:obj.computed);
+                html+=`<div style="margin-bottom:6px;"><strong>${main}</strong>: ${obj.computed}/${total} computed`; 
+                const subs=obj.subtypes||{}; let details=[];
+                Object.keys(subs).forEach(s=>{details.push(`${s}=${subs[s]}`);});
+                if(details.length) html+=` <span style="color:#6b7280;">(${details.join(', ')})</span>`;
+                html+='</div>';
+            });
+            if(!html) html='No metrics available.';
+            body.innerHTML=html;
+        }
+        function loadMetrics(){
+            if(!logId) return; fetch(`/metrics?log_id=${logId}`).then(r=>r.json()).then(renderMetrics).catch(()=>{const b=document.getElementById('metrics_body'); if(b) b.textContent='Failed to load metrics';});
+        }
+        function fillCompareSelectors(){
+            if(!logId) return; const am=document.getElementById('cmp_a_main'); const asub=document.getElementById('cmp_a_sub'); const bm=document.getElementById('cmp_b_main'); const bsub=document.getElementById('cmp_b_sub');
+            if(!am) return;
+            function fillMain(sel){ sel.innerHTML=''; Object.keys(issueMap).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k; sel.appendChild(o);}); }
+            function fillSub(mainSel, subSel){ subSel.innerHTML=''; (issueMap[mainSel.value]||[]).forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s; subSel.appendChild(o);}); }
+            fillMain(am); fillMain(bm);
+            fillSub(am, asub); fillSub(bm, bsub);
+        }
+        document.addEventListener('click', e=>{
+            if(e.target && e.target.id==='compare_btn'){
+                const payload={log_id:logId,a_main:cmp_a_main.value,a_sub:cmp_a_sub.value,b_main:cmp_b_main.value,b_sub:cmp_b_sub.value};
+                const out=document.getElementById('compare_result'); out.textContent='Comparing...';
+                fetch('/compare_issues',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(r=>r.json()).then(data=>{
+                    if(data.error){out.textContent=data.error;return;}
+                    out.textContent=`A: ${data.a.main} - ${data.a.sub} (${data.a.count})\nB: ${data.b.main} - ${data.b.sub} (${data.b.count})\nOverlap: ${data.intersection_count}\nA only: ${data.a_only}\nB only: ${data.b_only}`;
+                }).catch(err=>{out.textContent='Error: '+err;});
+            }
+        });
+    document.addEventListener('DOMContentLoaded',()=>{try{loadMetrics(); fillCompareSelectors();}catch(e){console.error('Init metrics/compare failed',e);}});
+    // Embedded summary & preview payloads
+    </script>
+    {% if result.eager_mode %}
+    <script id="preview_payload" type="application/json">{{ result.preview_log|tojson }}</script>
+    <script id="summary_payload" type="application/json">{{ result.summary|tojson }}</script>
+    <script>
+        (function(){
+            const pre = document.getElementById('raw_log_pre');
+            const btnPrev = document.getElementById('btn_show_preview');
+            const btnSum = document.getElementById('btn_show_summary');
+            if(!pre || !btnPrev || !btnSum) return;
+            const previewText = JSON.parse(document.getElementById('preview_payload').textContent || '""');
+            const summaryText = JSON.parse(document.getElementById('summary_payload').textContent || '""');
+            function setActive(which){
+                if(which==='preview'){
+                    pre.textContent = previewText || 'Preview not generated.';
+                    btnPrev.style.background='#1e293b';
+                    btnSum.style.background='#334155';
+                    document.getElementById('log_view_title').textContent='Preview';
+                } else {
+                    pre.textContent = summaryText || 'Summary not generated.';
+                    btnSum.style.background='#1e293b';
+                    btnPrev.style.background='#334155';
+                    document.getElementById('log_view_title').textContent='Summary';
+                }
+            }
+            btnPrev.addEventListener('click',()=>setActive('preview'));
+            btnSum.addEventListener('click',()=>setActive('summary'));
+            setActive('preview');
+        })();
+    </script>
+    {% endif %}
+</body>
+</html>

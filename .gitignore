@@ -1,0 +1,22 @@
+# PLM Analyzer standalone ignore file
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.env
+.venv
+venv/
+ENV/
+env/
+.ipynb_checkpoints/
+uploads/
+offline_bundle/
+cache_store/
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+dist/
+build/

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Translation Workspace</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <style>
+            :root { --bg:#0f172a; --panel:#1e293b; --panel-alt:#16243a; --accent:#6366f1; --accent-grad:linear-gradient(135deg,#6366f1 0%,#8b5cf6 55%,#6366f1 100%); --border:#334155; --text:#e2e8f0; --text-soft:#a5b4c7; --danger:#ef4444; --radius:12px; --shadow:0 4px 18px -6px rgba(0,0,0,.6);} 
+            body[data-theme='light'] { --bg:#f1f5f9; --panel:#ffffff; --panel-alt:#f8fafc; --border:#d0d7e2; --text:#1e293b; --text-soft:#64748b; --shadow:0 4px 14px -4px rgba(0,0,0,.15); background:linear-gradient(180deg,#ffffff,#f1f5f9); }
+            body[data-theme='light'] textarea, body[data-theme='light'] .output {background:linear-gradient(145deg,#ffffff 0%,#f1f5f9 110%);}        
+            body[data-theme='light'] .pane-head {background:#f1f5f9; color:#334155;} 
+            body[data-theme='light'] .topbar {background:rgba(255,255,255,.9); box-shadow:0 2px 8px rgba(0,0,0,.06);} 
+            body[data-theme='light'] .top-link {color:#64748b;} 
+            body[data-theme='light'] .top-link:hover {background:#e2e8f0;color:#1e293b;} 
+            body[data-theme='light'] .top-link.active {background:var(--accent);color:#fff;} 
+            body[data-theme='light'] .controls-bar, body[data-theme='light'] .meta {background:#f1f5f9;} 
+            body[data-theme='light'] select, body[data-theme='light'] input[type=text] {background:#ffffff;border-color:#cbd5e1;color:#1e293b;} 
+            body[data-theme='light'] textarea {border-color:#cbd5e1;color:#1e293b;} 
+            body[data-theme='light'] .btn {box-shadow:0 4px 12px -3px rgba(99,102,241,.35);} 
+            body[data-theme='light'] .btn:hover {filter:brightness(1.07);} 
+            /* Interactive accent surfaces */
+            body[data-theme='light'] .controls-bar {box-shadow:inset 0 1px 0 rgba(0,0,0,.04);}        
+            body[data-theme='light'] textarea:focus {background:#f8fafc;}        
+            body[data-theme='light'] .output {border-color:#d0d7e2;}        
+            body[data-theme='light'] .output .placeholder {color:#94a3b8;}        
+            body[data-theme='light'] .pane-head {border-bottom:2px solid #e2e8f0;}        
+            body[data-theme='light'] .top-link:focus-visible {outline:2px solid var(--accent);outline-offset:2px;}        
+            body[data-theme='light'] .theme-toggle {color:#64748b;}        
+            body[data-theme='light'] .theme-toggle:hover {color:#1e293b;}        
+            body[data-theme='light'] .meta {box-shadow:inset 0 1px 0 rgba(0,0,0,.04);}        
+            body[data-theme='light'] .footer-note {background:#ffffff;color:#64748b;}        
+            /* Shared transitions (exclude textarea for flicker reduction) */
+            body, .topbar, .pane-head, .output, .controls-bar, .meta {transition:background .35s,color .35s,border-color .35s,box-shadow .35s;}        
+            /* Override textarea to avoid flash on focus (narrow transitions & pre-promote) */
+            textarea {transition:border-color .18s ease, box-shadow .18s ease; will-change:border-color, box-shadow;}
+            .theme-toggle{border:none;background:transparent;color:var(--text-soft);cursor:pointer;padding:6px 8px;border-radius:8px;font-size:.85rem;display:flex;align-items:center;gap:6px;}
+            .theme-toggle:hover{background:#1e293b;color:var(--text);} 
+            body[data-theme='light'] .theme-toggle:hover{background:#e2e8f0;color:#1e293b;}
+        *{box-sizing:border-box;} body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;}
+        a{text-decoration:none;color:var(--text);} .topbar{display:flex;align-items:center;gap:18px;padding:10px 18px;background:#0c1424;border-bottom:1px solid var(--border);} .top-links{display:flex;gap:4px;}
+        .top-link{display:flex;align-items:center;gap:6px;padding:8px 14px;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;border:1px solid transparent;border-radius:8px;color:var(--text-soft);}        
+        .top-link:hover{background:#1e293b;color:var(--text);} .top-link.active{background:var(--accent);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.4);}        
+    .workspace{flex:1;display:flex;min-height:0;} .side{width:48%;display:flex;flex-direction:column;border-right:1px solid var(--border);background:linear-gradient(145deg,#1e293b 0%,#16243a 110%);}        
+    .main{flex:1;display:flex;flex-direction:column;background:linear-gradient(145deg,#16243a 0%,#1e293b 110%);} .pane-head{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#93c5fd;background:linear-gradient(135deg,#142033 0%,#1b2d47 110%);}        
+    .pane-title{background:transparent;padding:0 4px;border-radius:6px;display:inline-flex;align-items:center;gap:6px;font-size:.65rem;letter-spacing:.09em;color:#c7d2fe;box-shadow:none;}        
+    body[data-theme='light'] .pane-title{background:transparent;color:#334155;box-shadow:none;}        
+    textarea{flex:1;background:linear-gradient(145deg,#0f172a 0%,#112235 110%);border:1.5px solid var(--border);color:var(--text);resize:none;padding:14px 16px;font-size:.8rem;font-family:Consolas,monospace;border-radius:0 0 var(--radius) 0;line-height:1.45;}
+        textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);} .section{display:flex;flex-direction:column;min-height:0;flex:1;}
+    .output{flex:1;background:linear-gradient(145deg,#0f172a 0%,#112235 110%);border:1.5px solid var(--border);margin:0;font-size:.8rem;line-height:1.45;padding:16px 18px;overflow:auto;font-family:Consolas,monospace;border-radius:0 0 0 var(--radius);white-space:pre-wrap;word-break:break-word;box-shadow:inset 0 0 0 1px rgba(255,255,255,.03);}        
+        .output .placeholder{color:#64748b;font-style:italic;} .badge{display:inline-block;background:var(--accent);color:#fff;font-size:.55rem;font-weight:600;padding:4px 8px;border-radius:20px;letter-spacing:.08em;margin-right:8px;}
+    .controls-bar{display:flex;gap:10px;flex-wrap:wrap;padding:10px 14px;border-top:1px solid var(--border);background:#142033;align-items:center;}        
+    .field-label{opacity:.85;letter-spacing:.08em;text-transform:uppercase;font-weight:600;background:rgba(99,102,241,.14);padding:5px 10px;border-radius:8px;display:inline-flex;align-items:center;gap:6px;color:#93c5fd;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);}        
+    body[data-theme='light'] .field-label{background:#e0e7ff;color:#334155;box-shadow:inset 0 0 0 1px rgba(255,255,255,.9);}        
+    .field-label i{color:#6366f1;filter:drop-shadow(0 0 4px rgba(99,102,241,.4));font-size:.7rem;} body[data-theme='light'] .field-label i{filter:none;}        
+        select,input[type=text]{background:#0f172a;border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:.65rem;}
+    /* Colored icon accents */
+    .pane-head i{color:#60a5fa;filter:drop-shadow(0 0 4px rgba(96,165,250,.35));}
+    .pane-head + .section label span {color:var(--text-soft);}        
+    .controls-bar label span {color:var(--text-soft);}        
+    body[data-theme='light'] .pane-head i{filter:none;}
+        select:focus,input[type=text]:focus{outline:none;border-color:var(--accent);} .btn{background:var(--accent-grad);color:#fff;font-weight:600;border:none;padding:10px 16px;border-radius:9px;font-size:.65rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;letter-spacing:.05em;box-shadow:0 4px 14px -4px rgba(0,0,0,.5);} .btn:hover{filter:brightness(1.05);} .btn:active{transform:translateY(1px);} 
+        .meta{padding:10px 14px;font-size:.55rem;display:flex;flex-wrap:wrap;gap:14px;background:#132033;border-top:1px solid var(--border);} .meta div{opacity:.9;}
+        .footer-note{padding:8px 14px;font-size:.55rem;text-align:right;color:var(--text-soft);background:#0c1424;border-top:1px solid var(--border);} .stretch{flex:1;}
+    @media (max-width:1200px){.side{width:50%;}} @media (max-width:980px){.workspace{flex-direction:column;} .side{width:100%;border-right:none;border-bottom:1px solid var(--border);} textarea{border-radius:0;} .output{border-radius:0;} }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <div style="font-weight:600;font-size:.8rem;letter-spacing:.09em;color:#93c5fd;display:flex;align-items:center;gap:8px;"><i class="fas fa-language"></i> Translation Workspace</div>
+        <div class="top-links">
+            <a class="top-link" href="{{ url_for('index') }}"><i class="fas fa-bug"></i> Logs</a>
+            <a class="top-link" href="{{ url_for('duplicate_finder') }}"><i class="fas fa-copy"></i> Duplicates</a>
+            <a class="top-link active" href="{{ url_for('translate_page') }}"><i class="fas fa-language"></i> Translate</a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Toggle light/dark"><i class="fas fa-adjust"></i></button>
+        <div class="stretch"></div>
+        <div style="font-size:.55rem;color:var(--text-soft);">Offline Model Stub</div>
+    </div>
+    <form action="{{ url_for('translate_page') }}" method="post" id="translateForm" class="workspace">
+        <div class="side">
+            <div class="pane-head"><i class="fas fa-pencil-alt"></i> <span class="pane-title"><i class="fas fa-file-alt" style="font-size:.7rem;"></i> Source Text</span></div>
+            <div class="section">
+                <textarea name="source_text" placeholder="Paste tester description, steps, comments, error logs..." required>{{ source_text or '' }}</textarea>
+                <div class="controls-bar">
+                    <label style="display:flex;flex-direction:column;font-size:.55rem;gap:4px;">
+                        <span class="field-label"><i class="fas fa-flag"></i> Target</span>
+                        <select name="target_lang">
+                            <option value="en" {% if target_lang=='en' %}selected{% endif %}>English (en)</option>
+                        </select>
+                    </label>
+                    <label style="display:flex;flex-direction:column;font-size:.55rem;gap:4px;">
+                        <span class="field-label"><i class="fas fa-language"></i> Source (opt)</span>
+                        <input type="text" name="source_lang" placeholder="auto" value="{{ source_lang or '' }}" />
+                    </label>
+                    <button type="submit" class="btn"><i class="fas fa-language"></i> Translate</button>
+                    <div style="flex:1"></div>
+                    <div style="font-size:.55rem;color:var(--text-soft);max-width:240px;">Paste any language; output is English (stub model). Replace logic in translator/simple_translator.py</div>
+                </div>
+            </div>
+        </div>
+        <div class="main">
+            <div class="pane-head" style="border-left:1px solid var(--border);"><i class="fas fa-check-circle"></i> <span class="pane-title"><i class="fas fa-globe" style="font-size:.7rem;"></i> Translation Output</span></div>
+            <div class="section">
+                <div class="output" id="translatedBox">
+                    {% if translated %}<span class="badge">EN</span>{{ translated }}{% else %}<span class="placeholder">No translation yet. Paste text and press Translate.</span>{% endif %}
+                </div>
+                <div class="meta" style="min-height:60px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;">
+                    {% if meta %}{% for k,v in meta.items() %}<div><strong>{{ k }}:</strong> {{ v }}</div>{% endfor %}{% endif %}
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="footer-note">Stub interface – implement offline model in <code>translator/simple_translator.py</code>.</div>
+    <script>
+    (function(){
+        const saved=localStorage.getItem('plmTheme');
+        if(saved) document.body.dataset.theme=saved; else document.body.dataset.theme='dark';
+        document.getElementById('themeToggle')?.addEventListener('click',()=>{
+            const b=document.body; b.dataset.theme = b.dataset.theme==='light'?'dark':'light';
+            localStorage.setItem('plmTheme', b.dataset.theme);
+        });
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Duplicate Finder</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <style>
+            :root { --bg:#0f172a; --panel:#1e293b; --panel-alt:#16243a; --accent:#6366f1; --accent-grad:linear-gradient(135deg,#6366f1 0%,#8b5cf6 60%,#6366f1 100%); --border:#334155; --text:#e2e8f0; --text-soft:#9caec2; --danger:#ef4444; --warn:#f59e0b; --good:#10b981; --radius:12px; --shadow:0 4px 18px -6px rgba(0,0,0,.6);} 
+            body[data-theme='light'] { --bg:#f1f5f9; --panel:#ffffff; --panel-alt:#f8fafc; --border:#d0d7e2; --text:#1e293b; --text-soft:#64748b; --shadow:0 4px 14px -4px rgba(0,0,0,.15); background:linear-gradient(180deg,#ffffff,#f1f5f9);} 
+            body[data-theme='light'] .topbar {background:rgba(255,255,255,.9); box-shadow:0 2px 8px rgba(0,0,0,.06);} 
+            body[data-theme='light'] .top-link {color:#64748b;} 
+            body[data-theme='light'] .top-link:hover {background:#e2e8f0;color:#1e293b;} 
+            body[data-theme='light'] .top-link.active {background:var(--accent);color:#fff;} 
+            body[data-theme='light'] .left {background:#ffffff;} body[data-theme='light'] .right {background:#f8fafc;} 
+            body[data-theme='light'] input[type=text], body[data-theme='light'] textarea, body[data-theme='light'] select, body[data-theme='light'] .file-upload-label, body[data-theme='light'] .dup-card, body[data-theme='light'] .sum-item, body[data-theme='light'] .content {background:#ffffff;color:#1e293b;} 
+            body[data-theme='light'] .pane-head, body[data-theme='light'] .results-head {background:#f1f5f9;color:#334155;} 
+            body[data-theme='light'] .info-collapsible {background:#ffffff;} body[data-theme='light'] .info-collapsible[open] summary {background:#eef2f7;} 
+            body[data-theme='light'] .cards {background:#f8fafc;} body[data-theme='light'] .dup-card {border-color:#d0d7e2;} body[data-theme='light'] .dup-card:hover {border-color:var(--accent);} 
+            body[data-theme='light'] .btn {box-shadow:0 4px 12px -3px rgba(99,102,241,.35);} 
+            body[data-theme='light'] .left {border-right:none;} 
+            body[data-theme='light'] .resizer {background:linear-gradient(180deg,#f1f5f9,#e2e8f0);border-left:none;border-right:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.55),0 0 0 1px rgba(0,0,0,.04);} 
+            body[data-theme='light'] .resizer:after {background:linear-gradient(180deg,#cbd5e1,#94a3b8);width:3px;height:38px;box-shadow:0 0 0 1px rgba(255,255,255,.5);} 
+            body[data-theme='light'] .resizer:hover {background:linear-gradient(180deg,#e2e8f0,#d9e1ea);} 
+            body[data-theme='light'] .dup-card {position:relative;background:linear-gradient(145deg,#ffffff 0%,#f1f5f9 110%);border-color:#d0d7e2;}
+            body[data-theme='light'] .dup-card:hover {box-shadow:0 6px 18px -4px rgba(0,0,0,.14);background:#ffffff;}        
+            body[data-theme='light'] .sum-item {border:1px solid #d8e0ea;background:linear-gradient(145deg,#ffffff 0%,#f8fafc 110%);}        
+            body[data-theme='light'] .sum-item:hover {border-color:#94a3b8;background:#f1f5f9;}        
+            body[data-theme='light'] .content {border-color:#d2dae4;background:linear-gradient(145deg,#ffffff 0%,#f5f7ff 110%);color:#334155;}        
+            body[data-theme='light'] .file-upload-label {background:linear-gradient(145deg,#ffffff 0%,#f5f7ff 100%);border-color:#cbd5e1;}        
+            body[data-theme='light'] .file-upload-label:hover {background:#eef2ff;}        
+            body[data-theme='light'] .file-upload-label.drag-active {border-color:var(--accent);background:#e0e7ff;}        
+            body[data-theme='light'] .top-link:focus-visible {outline:2px solid var(--accent);outline-offset:2px;}        
+            body[data-theme='light'] .info-collapsible summary {color:#4f46e5;}        
+            body[data-theme='light'] .info-collapsible[open] summary {background:#e0e7ff;color:#4338ca;}        
+            /* Transitions */
+            body, .topbar, .left, .right, .pane-head, .results-head, .dup-card, .sum-item, .content, .info-collapsible {transition:background .35s,color .35s,border-color .35s,box-shadow .35s;} 
+            .theme-toggle{border:none;background:transparent;color:var(--text-soft);cursor:pointer;padding:6px 8px;border-radius:8px;font-size:.85rem;display:flex;align-items:center;gap:6px;} 
+            .theme-toggle:hover{background:#1e293b;color:var(--text);} body[data-theme='light'] .theme-toggle:hover{background:#e2e8f0;color:#1e293b;} 
+    *{box-sizing:border-box;} body{margin:0;font-family:Inter,system-ui,sans-serif;background:linear-gradient(135deg,#0b1324 0%,#12263d 55%,#182f49 100%);color:var(--text);height:100vh;display:flex;flex-direction:column;}
+    /* Prevent initial flash by disabling transitions until theme set */
+    body.preload, body.preload * {transition:none !important;}
+        .topbar{display:flex;align-items:center;gap:14px;padding:10px 18px;background:#0c1424;border-bottom:1px solid var(--border);} .top-links{display:flex;gap:4px;}
+        .top-link{display:flex;align-items:center;gap:6px;padding:8px 14px;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;border:1px solid transparent;border-radius:8px;color:var(--text-soft);} .top-link.active{background:var(--accent);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.4);} .top-link:hover{background:#1e293b;color:var(--text);} 
+    .workspace{flex:1;display:flex;min-height:0;} .left{width:46%;min-width:360px;max-width:65%;display:flex;flex-direction:column;background:linear-gradient(165deg,#1d2c41 0%,#22354a 120%);border-right:1px solid rgba(255,255,255,.05);transition:width .15s ease,background .4s,border-color .35s;} .right{flex:1;display:flex;flex-direction:column;background:linear-gradient(160deg,#203248 0%,#1a2637 120%);} 
+    .resizer{width:8px;cursor:col-resize;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;background:linear-gradient(180deg,#22354a,#162433);border-left:1px solid rgba(255,255,255,.04);border-right:1px solid rgba(0,0,0,.35);transition:background .35s,border-color .35s;} 
+    .resizer:after{content:"";width:2px;height:42px;border-radius:2px;background:linear-gradient(180deg,rgba(148,163,184,.85),rgba(71,85,105,.75));box-shadow:0 0 0 1px rgba(0,0,0,.4),0 0 5px -1px rgba(99,102,241,.35);} 
+    .resizer:hover{background:linear-gradient(180deg,#2a4258,#1b2d40);} 
+    body.resizing *{cursor:col-resize!important;user-select:none!important;} 
+        .pane-head{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#93c5fd;background:#142033;}
+        form{display:flex;flex-direction:column;flex:1;min-height:0;} .section{padding:14px 16px;display:flex;flex-direction:column;gap:14px;overflow:auto;}
+        label.small{font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--text-soft);display:flex;align-items:center;gap:6px;}
+    /* Colored option icons */
+    label.small i{color:#6366f1;filter:drop-shadow(0 0 4px rgba(99,102,241,.35));}
+    label.small[for=problem_content] i{color:#0ea5e9;filter:drop-shadow(0 0 4px rgba(14,165,233,.35));}
+    label.small[for=csv_file] i{color:#f59e0b;filter:drop-shadow(0 0 4px rgba(245,158,11,.3));}
+    body[data-theme='light'] label.small i{filter:none;}
+    .slider-row .slider-icon{color:#10b981;filter:drop-shadow(0 0 4px rgba(16,185,129,.35));font-size:.75rem;}
+    .semantic-row i{color:#9333ea;filter:drop-shadow(0 0 4px rgba(147,51,234,.35));}
+        input[type=text],textarea,select{background:#0f172a;border:1.5px solid var(--border);color:var(--text);padding:10px 12px;font-size:.7rem;font-family:inherit;border-radius:8px;width:100%;}
+        textarea{resize:vertical;min-height:150px;line-height:1.4;}
+        input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);} 
+        .file-upload{position:relative;} .file-upload input[type=file]{position:absolute;opacity:0;inset:0;width:100%;height:100%;cursor:pointer;} .file-upload-label{display:flex;align-items:center;justify-content:center;padding:18px;border:2px dashed var(--border);border-radius:10px;background:linear-gradient(145deg,#16243a 0%,#132032 100%);cursor:pointer;transition:.25s;min-height:72px;font-size:.65rem;color:var(--text-soft);} .file-upload-label:hover{border-color:var(--accent);background:rgba(99,102,241,.08);} .file-upload-label i{font-size:1.4rem;color:#64748b;margin-right:10px;}
+        .slider-row{display:flex;align-items:center;gap:10px;font-size:.6rem;} .slider-row span{width:42px;text-align:center;}
+        input[type=range]{flex:1;height:6px;background:#1e293b;border-radius:4px;outline:none;} input[type=range]::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;}
+        .semantic-row{display:flex;align-items:center;gap:8px;font-size:.6rem;} .semantic-row input{width:auto;margin:0;}
+        .actions{padding:12px 16px;border-top:1px solid var(--border);background:#142033;display:flex;align-items:center;gap:12px;}
+        .btn{background:var(--accent-grad);color:#fff;font-weight:600;border:none;padding:10px 18px;border-radius:9px;font-size:.65rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;letter-spacing:.05em;box-shadow:0 4px 14px -4px rgba(0,0,0,.5);} .btn:hover{filter:brightness(1.05);} .btn:active{transform:translateY(1px);} 
+        .loading{display:none;font-size:.65rem;color:var(--text-soft);} .show{display:block !important;}
+    .info-collapsible{background:linear-gradient(145deg,#132033 0%,#0f1b2c 110%);border:1px solid var(--border);margin:10px 16px 0;border-radius:14px;box-shadow:0 4px 14px -6px rgba(0,0,0,.55);transition:background .35s,border-color .35s,box-shadow .35s;overflow:hidden;}
+    .info-collapsible summary{cursor:pointer;list-style:none;padding:12px 16px;font-size:.6rem;text-transform:uppercase;letter-spacing:.07em;font-weight:700;color:#93c5fd;display:flex;align-items:center;gap:8px;position:relative;}
+    .info-collapsible summary:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(99,102,241,.15),rgba(99,102,241,0));opacity:0;transition:opacity .35s;}
+    .info-collapsible:hover summary:before{opacity:1;}
+    .info-collapsible[open] summary{background:#142b4a;box-shadow:inset 0 0 0 1px rgba(99,102,241,.35);}
+    .info-collapsible div{padding:12px 16px 14px 16px;font-size:.6rem;line-height:1.5;color:var(--text-soft);background:linear-gradient(145deg,#16243a 0%,#132032 110%);} .info-collapsible ul{margin:6px 0 0 16px;padding:0;} .info-collapsible li{margin-bottom:4px;}
+    body[data-theme='light'] .info-collapsible {background:linear-gradient(145deg,#ffffff 0%,#f1f5f9 110%);border-color:#d0d7e2;box-shadow:0 4px 14px -6px rgba(0,0,0,.12);}        
+    body[data-theme='light'] .info-collapsible summary {color:#4f46e5;}        
+    body[data-theme='light'] .info-collapsible[open] summary {background:#e0e7ff;box-shadow:inset 0 0 0 1px rgba(79,70,229,.35);}        
+    body[data-theme='light'] .info-collapsible div {background:linear-gradient(145deg,#ffffff 0%,#f1f5f9 110%);}        
+        /* Right / results */
+        .results-head{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#93c5fd;background:#142033;}
+        .results-body{flex:1;display:flex;flex-direction:column;overflow:auto;}
+        .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;padding:14px 16px;background:linear-gradient(145deg,#162a3d 0%,#132033 110%);border-bottom:1px solid var(--border);}        
+        .sum-item{background:linear-gradient(145deg,#1b2d40 0%,#152435 110%);border:1px solid #263a4f;padding:10px 10px 12px;border-radius:10px;display:flex;flex-direction:column;gap:6px;box-shadow:0 2px 6px -2px rgba(0,0,0,.5);transition:background .35s,border-color .35s,box-shadow .35s;}
+        .sum-val{font-size:.85rem;font-weight:600;color:var(--accent);} .sum-lab{font-size:.55rem;color:var(--text-soft);letter-spacing:.05em;text-transform:uppercase;}
+        .cards{padding:18px;display:flex;flex-direction:column;gap:14px;}
+        .dup-card{background:linear-gradient(155deg,#1b2d40 0%,#152434 105%);border:1px solid #283b52;border-left:4px solid var(--accent);padding:16px 18px;border-radius:14px;display:flex;flex-direction:column;gap:8px;transition:.35s;box-shadow:0 4px 14px -6px rgba(0,0,0,.55);}        
+        .dup-card:hover{border-color:var(--accent);box-shadow:0 6px 20px -6px rgba(0,0,0,.65),0 0 0 1px rgba(99,102,241,.25);background:linear-gradient(155deg,#22364b 0%,#182c3c 105%);} .dup-title{font-size:.78rem;font-weight:600;line-height:1.35;color:#e6edf5;letter-spacing:.25px;}
+        .dup-meta{display:flex;align-items:center;gap:8px;font-size:.5rem;text-transform:uppercase;letter-spacing:.06em;color:#9cb2c9;flex-wrap:wrap;}
+        .pill{background:var(--accent);color:#fff;padding:4px 8px;border-radius:20px;font-size:.55rem;font-weight:600;}
+        .plm{background:#f59e0b;color:#1e1e1e;padding:4px 7px;border-radius:6px;font-size:.55rem;font-weight:600;font-family:Consolas,monospace;}
+        .content{font-size:.6rem;line-height:1.45;color:#b1c2d3;max-height:140px;overflow:auto;border:1px solid #2a4257;padding:10px 12px;border-radius:10px;background:linear-gradient(145deg,#132b42 0%,#112335 110%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);}        
+        .empty{padding:40px 20px;text-align:center;font-size:.7rem;color:#64748b;}
+        .alert{margin:10px 16px 0;padding:10px 14px;border-radius:8px;font-size:.6rem;font-weight:600;}
+        .alert-error{background:#3f1d1d;border:1px solid #7f1d1d;color:#fca5a5;} .alert-warning{background:#422006;border:1px solid #92400e;color:#fcd34d;} .alert-success{background:#062e12;border:1px solid #14532d;color:#6ee7b7;}
+        @media (max-width:1100px){.left{width:50%;}} @media (max-width:980px){.workspace{flex-direction:column;} .left{width:100%;min-width:0;border-right:none;border-bottom:1px solid var(--border);} }
+    </style>
+</head>
+<body class="preload" data-theme="dark">
+    <script>
+        // Apply saved theme ASAP before rendering rest to avoid flash
+        (function(){
+            try{
+                var t=localStorage.getItem('plmTheme');
+                if(t){ document.body.setAttribute('data-theme', t); }
+            }catch(e){}
+        })();
+    </script>
+    <div class="topbar">
+        <div style="font-weight:600;font-size:.8rem;letter-spacing:.09em;color:#93c5fd;display:flex;align-items:center;gap:8px;"><i class="fas fa-copy"></i> Duplicate Finder</div>
+        <div class="top-links">
+            <a class="top-link" href="{{ url_for('index') }}"><i class="fas fa-bug"></i> Logs</a>
+            <a class="top-link active" href="{{ url_for('duplicate_finder') }}"><i class="fas fa-copy"></i> Duplicates</a>
+            <a class="top-link" href="{{ url_for('translate_page') }}"><i class="fas fa-language"></i> Translate</a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Toggle light/dark"><i class="fas fa-adjust"></i></button>
+        <div style="flex:1"></div>
+        <div style="font-size:.55rem;color:var(--text-soft);">Semantic + Heuristic Matching</div>
+    </div>
+    <div class="workspace">
+        <div class="left" id="dupLeft">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'error' if category == 'error' else 'warning' if category == 'warning' else 'success' }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <details class="info-collapsible" open>
+                <summary><i class="fas fa-info-circle"></i> How It Works</summary>
+                <div>
+                    Enter title + description and upload your CSV issues database. We'll compute similarity using either a semantic embedding model (if available) or a fallback algorithm.<br><br>
+                    <strong>Tips:</strong>
+                    <ul>
+                        <li>Include steps, error messages, device model</li>
+                        <li>Keep threshold high (≥80%) for precision</li>
+                        <li>Use semantic mode for concept-level matches</li>
+                    </ul>
+                </div>
+            </details>
+            <form action="{{ url_for('find_duplicates') }}" method="post" enctype="multipart/form-data" id="duplicateForm" style="flex:1;display:flex;flex-direction:column;">
+                <div class="section" style="flex:1;">
+                    <label class="small" for="problem_title"><i class="fas fa-heading"></i> Problem Title</label>
+                    <input type="text" id="problem_title" name="problem_title" placeholder="Camera app crashes switching to front camera" required />
+                    <label class="small" for="problem_content"><i class="fas fa-file-lines"></i> Problem Description</label>
+                    <textarea id="problem_content" name="problem_content" placeholder="Steps, error messages, device info, frequency..." required></textarea>
+                    <label class="small" for="csv_file"><i class="fas fa-table"></i> Issues Database (CSV)</label>
+                    <div class="file-upload">
+                        <input type="file" id="csv_file" name="csv_file" accept=".csv" required>
+                        <label for="csv_file" class="file-upload-label"><i class="fas fa-cloud-upload-alt"></i><span>Choose or drop CSV database</span></label>
+                    </div>
+                    <div class="slider-row">
+                        <i class="fas fa-sliders-h slider-icon" title="Similarity threshold"></i>
+                        <span>50%</span>
+                        <input type="range" id="similarity_threshold" name="similarity_threshold" min="50" max="95" value="80" step="5">
+                        <span class="threshold-value">80%</span>
+                    </div>
+                    <div class="semantic-row">
+                        <input type="checkbox" id="use_semantic" name="use_semantic" value="1" />
+                        <label for="use_semantic" style="cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="fas fa-brain"></i> Use Semantic Model (if bundled)</label>
+                    </div>
+                    <small style="font-size:.55rem;color:var(--text-soft);">CSV must contain columns: PLM_ID, problem_title, problem_description</small>
+                </div>
+                <div class="actions">
+                    <button type="submit" class="btn" id="submitBtn"><i class="fas fa-search"></i> Find Duplicates</button>
+                    <div class="loading" id="loading"><i class="fas fa-spinner fa-spin"></i> Analyzing...</div>
+                </div>
+            </form>
+        </div>
+    <div class="resizer" id="dupResizer" title="Drag to resize"></div>
+    <div class="right">
+            <div class="results-head"><i class="fas fa-list"></i> Matches (after submission)</div>
+            <div class="results-body" id="resultsPlaceholder">
+                <div class="empty">Submit a query to view matches here.</div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Resizer logic
+        (function(){
+            const resizer=document.getElementById('dupResizer');
+            const left=document.getElementById('dupLeft');
+            if(!resizer||!left) return;
+            const saved=localStorage.getItem('dupLeftW');
+            if(saved){ const w=parseInt(saved,10); if(w>360 && w<window.innerWidth*0.75) left.style.width=w+'px'; }
+            let startX,startW;
+            function move(e){ const clientX = e.touches? e.touches[0].clientX : e.clientX; const dx=clientX-startX; let nw=startW+dx; const max=Math.min(window.innerWidth*0.7, window.innerWidth-400); if(nw<360) nw=360; if(nw>max) nw=max; left.style.width=nw+'px'; }
+            function up(){ document.body.classList.remove('resizing'); window.removeEventListener('mousemove',move); window.removeEventListener('mouseup',up); window.removeEventListener('touchmove',move); window.removeEventListener('touchend',up); localStorage.setItem('dupLeftW', parseInt(getComputedStyle(left).width,10)); }
+            function down(e){ startX = e.touches? e.touches[0].clientX : e.clientX; startW=parseInt(getComputedStyle(left).width,10); document.body.classList.add('resizing'); window.addEventListener('mousemove',move); window.addEventListener('mouseup',up); window.addEventListener('touchmove',move); window.addEventListener('touchend',up); }
+            resizer.addEventListener('mousedown',down); resizer.addEventListener('touchstart',down);
+        })();
+        (function(){
+            // Theme already applied early; just wire toggle and then remove preload class
+            if(!document.body.dataset.theme){
+                const saved=localStorage.getItem('plmTheme');
+                document.body.dataset.theme = saved || 'dark';
+            }
+            document.getElementById('themeToggle')?.addEventListener('click',()=>{
+                const b=document.body; b.dataset.theme = b.dataset.theme==='light'?'dark':'light';
+                localStorage.setItem('plmTheme', b.dataset.theme);
+            });
+            // Allow a frame so layout settles, then remove preload to re-enable transitions
+            setTimeout(()=>document.body.classList.remove('preload'), 60);
+        })();
+        // File upload preview
+        document.getElementById('csv_file').addEventListener('change', e=>{
+            const f=e.target.files[0]; if(!f) return; const label=document.querySelector('.file-upload-label');
+            label.innerHTML=`<i class=\"fas fa-file-csv\"></i><span>${f.name} (${(f.size/1024/1024).toFixed(2)} MB)</span>`; label.style.borderColor='var(--accent)';
+        });
+        document.getElementById('similarity_threshold').addEventListener('input', function(){ document.querySelector('.threshold-value').textContent=this.value+'%'; });
+        document.getElementById('duplicateForm').addEventListener('submit', function(){ document.getElementById('loading').classList.add('show'); });
+        const dropZone=document.querySelector('.file-upload-label');
+        const prevent=e=>{e.preventDefault(); e.stopPropagation();};
+        ['dragenter','dragover'].forEach(ev=>dropZone.addEventListener(ev,e=>{prevent(e); dropZone.style.borderColor='var(--accent)'; dropZone.style.background='rgba(99,102,241,.08)';}));
+        ['dragleave','drop'].forEach(ev=>dropZone.addEventListener(ev,e=>{prevent(e); dropZone.style.borderColor='var(--border)'; dropZone.style.background='linear-gradient(145deg,#16243a 0%,#132032 100%)';}));
+        dropZone.addEventListener('drop', e=>{const f=e.dataTransfer.files[0]; if(f){ document.getElementById('csv_file').files=e.dataTransfer.files; const label=dropZone; label.innerHTML=`<i class=\"fas fa-file-csv\"></i><span>${f.name} (${(f.size/1024/1024).toFixed(2)} MB)</span>`; label.style.borderColor='var(--accent)'; }});
+    </script>
+</body>
+</html>

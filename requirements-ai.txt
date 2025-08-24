@@ -1,0 +1,36 @@
+# Extended AI/ML dependencies (optional). Keep separate to allow lean base install.
+# Copy both requirements.txt and this file for full offline environment.
+
+# Sentence / text embedding models
+sentence-transformers==3.0.1
+transformers==4.42.4
+huggingface-hub==0.24.5
+tokenizers==0.19.1
+accelerate==0.32.1
+safetensors==0.4.3
+
+# Torch CPU build (specify version for reproducibility). For GPU replace with appropriate +cu* wheel.
+torch==2.3.1
+
+# Language detection / translation
+langdetect==1.0.9
+deep-translator==1.11.4
+
+# Vector / similarity utilities
+faiss-cpu==1.8.0.post1
+
+# Optional: OpenAI (commented out unless you have API key)
+# openai==1.35.10
+
+# Data / numeric libs (if not already installed by base)
+numpy==1.26.4
+scipy==1.11.4
+pandas==2.2.2
+scikit-learn==1.4.2
+
+# Caching / performance
+joblib==1.4.2
+
+# Misc
+regex==2024.5.15
+
