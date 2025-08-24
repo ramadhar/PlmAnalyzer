@@ -332,32 +332,17 @@
             <a href="{{ url_for('index') }}" class="back-link"><i class="fas fa-arrow-left"></i> New Upload</a>
         </aside>
         <main class="main-pane">
-            <section class="logs-pane">
+            <section class="logs-pane" style="flex:1;display:flex;flex-direction:column;">
                 <div class="pane-header" style="gap:12px;"><i class="fas fa-file-alt"></i>
                     <span id="log_view_title">Issue Logs</span>
                     <div style="margin-left:auto;display:flex;gap:6px;"></div>
                 </div>
-                <pre class="code-view" id="raw_log_pre" style="position:relative;">{{ result.preview_log if result.preview_log else 'No relevant log lines extracted for this issue.' }}</pre>
-            </section>
-            <section class="analysis-pane">
-                <div class="pane-header"><i class="fas fa-search"></i> {% if result.single_stack %}System Fatal Stack{% else %}Relevant Matches ({{ result.relevant_logs|length }}){% endif %}</div>
-                <div class="matches-scroll" id="matches_container">
-                {% if result.relevant_logs %}
-                    {% for log_entry in result.relevant_logs %}
-                    <div class="match-block">
-                        <div class="match-title">Line {{ log_entry.line_number }}{% if log_entry.keyword %} • {{ log_entry.keyword }}{% endif %}</div>
-                        <pre class="match-context">{{ log_entry.matched_line }}</pre>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="no-matches">No matches for selected issue.</div>
-                {% endif %}
-                </div>
-                <div class="root-cause-box">
+                <pre class="code-view" id="raw_log_pre" style="position:relative;flex:1;">{{ result.preview_log if result.preview_log else 'No relevant log lines extracted for this issue.' }}</pre>
+                <div class="root-cause-box" style="margin-top:12px;">
                     <div class="rc-title"><i class="fas fa-lightbulb"></i> Root Cause</div>
                     <pre class="rc-text">{{ result.root_cause }}</pre>
                 </div>
-                <div class="timestamp">Completed: {{ result.timestamp }}</div>
+                <div class="timestamp" style="margin-top:8px;">Completed: {{ result.timestamp }}</div>
             </section>
         </main>
     </div>
