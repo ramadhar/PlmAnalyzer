@@ -721,6 +721,7 @@ def upload_file():
         current['package_name'] = package_name
         from datetime import datetime as _dt
         current['timestamp'] = _dt.now().strftime('%Y-%m-%d %H:%M:%S')
+        # TODO: Inline display enhancement: render on index without navigation (AJAX JSON response + DOM update)
         return render_template('results.html', result=current)
     except Exception as e:
         logger.error(f"Error processing file: {str(e)}")

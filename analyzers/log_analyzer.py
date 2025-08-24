@@ -209,11 +209,23 @@ class LogAnalyzer:
         if not keywords:
             return []
         keywords_lower = [k.lower() for k in keywords]
+        # For App Crashes generic subtype, tighten filtering to avoid unrelated ActivityManager slow ops etc.
+        restrict_activitymanager = False
+        if key == ('App Crashes', 'App Crashes'):
+            restrict_activitymanager = True
+            # augment keywords to include common exception markers if not already present
+            for extra in ['exception', 'fatal signal', 'am_crash']:
+                if extra not in keywords_lower:
+                    keywords_lower.append(extra)
         results = []
         # Simulate readline loop (no need to allocate all lines twice)
         lines = log_content.splitlines()
         for idx, line in enumerate(lines, start=1):
             low = line.lower()
+            if restrict_activitymanager:
+                # Skip noisy slow operation / battery stat lines
+                if 'activitymanager' in low and ('slow operation' in low or 'starting to update pids map' in low or 'done updating pids map' in low):
+                    continue
             matched_kw = None
             for kw in keywords_lower:
                 if kw in low:
