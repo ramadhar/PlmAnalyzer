@@ -24,6 +24,10 @@ except Exception:
     AdvancedDuplicateFinder = None  # Fallback gracefully
 try:
     from translator.simple_translator import SimpleTranslator
+    try:
+        from ai.ai_assistant import get_ai_assistant
+    except Exception:
+        get_ai_assistant = None
 except Exception:
     SimpleTranslator = None
 
@@ -805,6 +809,63 @@ def duplicate_finder():
 def ai_help_page():
     """UI page for AI assisted analysis & log explanation (frontend only for now)."""
     return render_template('ai_help.html', ai_mode=AI_MODE)
+
+@app.route('/api/ai/analyze_problem', methods=['POST'])
+def api_ai_analyze_problem():
+    """Analyze a problem (title+description+logs) using heuristic AI assistant.
+    JSON body: {title, description, logs}
+    Returns structured analysis sections. Safe for offline usage.
+    """
+    if get_ai_assistant is None:
+        return jsonify({'error': 'ai_module_unavailable'}), 503
+    try:
+        data = request.get_json(force=True) or {}
+        title = (data.get('title') or '').strip()
+        description = (data.get('description') or '').strip()
+        logs = data.get('logs') or ''
+        if not (title or description):
+            return jsonify({'error': 'missing_title_or_description'}), 400
+        assistant = get_ai_assistant()
+        result = assistant.analyze_problem(title, description, logs)
+        return jsonify({
+            'problem_hash': result.problem_hash,
+            'summary': result.summary,
+            'categories': result.categories,
+            'sections': [{'title': s.title, 'details': s.details} for s in result.sections],
+            'metrics': result.metrics,
+            'generated_at': result.generated_at
+        })
+    except Exception as e:
+        logger.exception('ai_analyze_problem error')
+        return jsonify({'error': 'internal', 'detail': str(e)}), 500
+
+@app.route('/api/ai/explain_logs', methods=['POST'])
+def api_ai_explain_logs():
+    """Explain raw logs with optional focus keyword.
+    JSON body: {logs, focus}
+    Returns heuristic findings & notable lines.
+    """
+    if get_ai_assistant is None:
+        return jsonify({'error': 'ai_module_unavailable'}), 503
+    try:
+        data = request.get_json(force=True) or {}
+        logs = data.get('logs') or ''
+        focus = data.get('focus') or None
+        if not logs.strip():
+            return jsonify({'error': 'missing_logs'}), 400
+        assistant = get_ai_assistant()
+        result = assistant.explain_logs(logs, focus)
+        return jsonify({
+            'log_hash': result.log_hash,
+            'findings': result.findings,
+            'notable_lines': result.notable_lines,
+            'summary': result.summary,
+            'metrics': result.metrics,
+            'generated_at': result.generated_at
+        })
+    except Exception as e:
+        logger.exception('ai_explain_logs error')
+        return jsonify({'error': 'internal', 'detail': str(e)}), 500
 
 _translator_instance = None
 

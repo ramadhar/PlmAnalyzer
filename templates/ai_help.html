@@ -9,11 +9,11 @@
 *{box-sizing:border-box;margin:0;padding:0;} body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#0b1324,#15273f);color:#e2e8f0;min-height:100vh;display:flex;flex-direction:column;} body[data-theme='light']{background:linear-gradient(120deg,#eff6ff,#f5f3ff);color:#1e293b;}
 .topbar{display:flex;align-items:center;gap:14px;padding:10px 18px;background:rgba(15,25,38,.85);backdrop-filter:blur(12px);border-bottom:1px solid #233547;position:sticky;top:0;z-index:50;} body[data-theme='light'] .topbar{background:rgba(255,255,255,.85);border-color:#cbd5e1;}
 .brand{font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:8px;} .brand i{color:#38bdf8;}
-.nav-links{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;} .nav-links a{font-size:.65rem;text-decoration:none;color:#94a3b8;padding:6px 10px;border-radius:8px;font-weight:600;letter-spacing:.5px;background:#1d2c41;border:1px solid #2f4259;transition:.25s;} .nav-links a:hover{background:#273b54;color:#fff;} body[data-theme='light'] .nav-links a{background:#f1f5f9;border-color:#cbd5e1;color:#475569;} body[data-theme='light'] .nav-links a:hover{background:#e2e8f0;color:#1e293b;}
+.nav-links{display:flex;gap:6px;flex-wrap:wrap;margin-left:12px;} .nav-links a{font-size:.65rem;text-decoration:none;color:#94a3b8;padding:6px 10px;border-radius:8px;font-weight:600;letter-spacing:.5px;background:#1d2c41;border:1px solid #2f4259;transition:.25s;} .nav-links a:hover{background:#273b54;color:#fff;} body[data-theme='light'] .nav-links a{background:#f1f5f9;border-color:#cbd5e1;color:#334155;} body[data-theme='light'] .nav-links a:hover{background:#e2e8f0;color:#0f172a;}
 .layout{flex:1;display:flex;gap:14px;padding:18px;max-width:1800px;width:100%;margin:0 auto;flex-wrap:wrap;}
 .panel{flex:1 1 560px;display:flex;flex-direction:column;min-height:520px;background:linear-gradient(155deg,#1d2c41,#24354c);border:1px solid #2e445b;border-radius:18px;padding:18px 20px;position:relative;box-shadow:0 6px 20px -6px rgba(0,0,0,.55);} body[data-theme='light'] .panel{background:linear-gradient(155deg,#ffffff,#f1f5f9);border-color:#d0dae5;box-shadow:0 6px 18px -6px rgba(0,0,0,.12);} 
 .panel h2{font-size:.95rem;margin:0 0 8px;font-weight:600;display:flex;align-items:center;gap:8px;}
-.desc{font-size:.63rem;line-height:1.35;color:#94a3b8;margin-bottom:12px;max-width:900px;} body[data-theme='light'] .desc{color:#64748b;}
+.desc{font-size:.63rem;line-height:1.35;color:#94a3b8;margin-bottom:12px;max-width:900px;} body[data-theme='light'] .desc{color:#475569;}
 textarea,input{font-family:inherit;border:1px solid #2f4259;background:#0f1827;color:#e2e8f0;border-radius:10px;padding:12px 14px;font-size:.7rem;width:100%;resize:vertical;min-height:110px;} body[data-theme='light'] textarea, body[data-theme='light'] input{background:#f8fafc;color:#1e293b;border-color:#cbd5e1;}
 input{min-height:44px;}
 label{font-size:.6rem;font-weight:700;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:6px;color:#cbd5e1;text-transform:uppercase;} body[data-theme='light'] label{color:#475569;}
@@ -31,6 +31,42 @@ button{border:none;cursor:pointer;font-weight:600;font-size:.65rem;letter-spacin
 .header-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .small-note{font-size:.55rem;color:#64748b;margin-top:4px;}
 @media (max-width:980px){.panel{min-height:unset;}}
+/* Tabs */
+.ai-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+.ai-tab{background:#1d2c41;border:1px solid #2f4259;color:#94a3b8;padding:10px 16px;border-radius:12px;font-size:.65rem;font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer;transition:.25s;}
+.ai-tab:hover{background:#273b54;color:#fff;}
+.ai-tab.active{background:linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899);color:#fff;border-color:#6366f1;box-shadow:0 4px 12px -4px rgba(0,0,0,.55);} 
+body[data-theme='light'] .ai-tab{background:#f1f5f9;border-color:#cbd5e1;color:#475569;}
+body[data-theme='light'] .ai-tab:hover{background:#e2e8f0;color:#1e293b;}
+body[data-theme='light'] .ai-tab.active{background:linear-gradient(135deg,#4f46e5,#7c3aed,#db2777);color:#fff;border-color:#4f46e5;box-shadow:0 4px 10px -4px rgba(79,70,229,.35);} 
+/* Single expanded panel adjustments */
+.panel.single{width:100%;flex:1;}
+.hidden{display:none !important;}
+.two-col{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px;}
+.two-col .col-block{flex:1 1 340px;display:flex;flex-direction:column;}
+.two-col .logs-block{flex:2 1 520px;}
+textarea.short{min-height:90px;}
+/* Log preview mimic */
+.preview-wrapper{margin-top:14px;display:flex;flex-direction:column;height:380px;}
+.log-preview-header{padding:10px 14px;font-size:.7rem;font-weight:600;color:var(--color-text,#e2e8f0);letter-spacing:.09em;text-transform:uppercase;background:var(--color-bg-alt,#0f1827);border:1px solid #2e445b;border-bottom:none;border-radius:12px 12px 0 0;display:flex;align-items:center;gap:6px;}
+.log-preview{flex:1;white-space:pre-wrap;font-family:Consolas,monospace;font-size:12px;line-height:1.35;color:#d1d5db;padding:14px 16px;overflow:auto;background:#000;border:1px solid #2e445b;border-top:none;border-radius:0 0 12px 12px;}
+body[data-theme='light'] .log-preview{background:#f8fafc;color:#334155;border-color:#cbd5e1;}
+body[data-theme='light'] .log-preview-header{background:#e2e8f0;border-color:#cbd5e1;color:#1e293b;}
+@media (max-width:900px){.preview-wrapper{height:300px;}}
+/* Split pane (2:3) */
+.split-pane{display:flex;gap:0;width:100%;height:calc(100vh - 170px);max-height:none;position:relative;border:1px solid #2e445b;border-radius:16px;overflow:hidden;background:linear-gradient(155deg,#1d2c41,#24354c);} body[data-theme='light'] .split-pane{background:linear-gradient(155deg,#ffffff,#f1f5f9);border-color:#d0dae5;}
+.pane{display:flex;flex-direction:column;min-width:0;}
+.pane.left{flex:0 0 40%;max-width:70%;min-width:22%;background:rgba(0,0,0,.12);} body[data-theme='light'] .pane.left{background:rgba(0,0,0,.02);}
+.pane.right{flex:1;min-width:30%;display:flex;}
+.pane-inner{padding:16px 18px;overflow:auto;display:flex;flex-direction:column;gap:10px;}
+.divider{width:8px;cursor:col-resize;background:linear-gradient(180deg,#384961,#203044);position:relative;flex:0 0 8px;display:flex;align-items:center;justify-content:center;} body[data-theme='light'] .divider{background:linear-gradient(180deg,#cbd5e1,#94a3b8);} 
+.divider:after{content:"";width:3px;height:46px;border-radius:3px;background:rgba(255,255,255,.25);} body[data-theme='light'] .divider:after{background:rgba(0,0,0,.25);} 
+.divider.dragging{background:linear-gradient(180deg,#6366f1,#8b5cf6);} body[data-theme='light'] .divider.dragging{background:linear-gradient(180deg,#4f46e5,#7c3aed);} 
+.output-shell{display:flex;flex-direction:column;flex:1;min-height:0;}
+.output-header{padding:12px 16px;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid #2e445b;background:#0f1827;} body[data-theme='light'] .output-header{background:#e2e8f0;border-color:#cbd5e1;color:#1e293b;}
+.output-body{flex:1;min-height:0;overflow:auto;padding:14px 16px;font-family:Consolas,monospace;font-size:12px;line-height:1.4;background:#000;color:#d1d5db;} body[data-theme='light'] .output-body{background:#f8fafc;color:#334155;}
+@media (max-width:1100px){.split-pane{flex-direction:column;height:auto;max-height:none;}.divider{height:8px;width:auto;cursor:row-resize;}.divider:after{width:46px;height:3px;}}
+@media (max-width:1100px){.pane.left,.pane.right{flex:unset;min-width:100%;max-width:100%;}}
 </style>
 </head>
 <body>
@@ -42,35 +78,72 @@ button{border:none;cursor:pointer;font-weight:600;font-size:.65rem;letter-spacin
             <a href="/translate" title="Translate">Translate</a>
             <a href="/ai_help" style="background:linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899);color:#fff;" title="AI Help">AI Help</a>
         </div>
+        <style>
+        .brand{font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:8px;width:240px;flex:0 0 240px;} .brand i{color:#38bdf8;}
+        @media(max-width:780px){.brand{width:auto;flex:0 0 auto;}}
+        .nav-links{display:flex;gap:6px;flex-wrap:wrap;margin-left:0;} .nav-links a{font-size:.65rem;text-decoration:none;color:#94a3b8;padding:6px 10px;border-radius:8px;font-weight:600;letter-spacing:.5px;background:#1d2c41;border:1px solid #2f4259;transition:.25s;} .nav-links a:hover{background:#273b54;color:#fff;} body[data-theme='light'] .nav-links a{background:#f1f5f9;border-color:#cbd5e1;color:#475569;} body[data-theme='light'] .nav-links a:hover{background:#e2e8f0;color:#1e293b;}
+        </style>
         <button id="themeToggle" class="toggle-theme" title="Toggle theme"><i class="fas fa-adjust"></i></button>
         {% if ai_mode %}<div class="badge-ai">AI MODE</div>{% endif %}
     </div>
-    <div class="layout">
-        <!-- Problem + Logs Analysis Panel -->
-        <div class="panel" id="problemPanel">
-            <h2><i class="fas fa-microscope"></i> Problem & Log Analysis</h2>
-            <div class="desc">Provide a problem title, description, and related logs. An AI prompt (to be wired) will generate structured analysis: summary, log insights, root cause, source classification, and recommendations.</div>
-            <div class="field"><label for="pTitle"><i class="fas fa-heading"></i> Problem Title</label><input id="pTitle" placeholder="e.g. App crashes after login on Android 14" /></div>
-            <div class="field"><label for="pDesc"><i class="fas fa-align-left"></i> Problem Description</label><textarea id="pDesc" placeholder="Detailed steps, device model, frequency, expected vs actual..."></textarea></div>
-            <div class="field"><label for="pLogs"><i class="fas fa-file-code"></i> Logs</label><textarea id="pLogs" placeholder="Paste relevant logcat, crash stack, ANR traces, etc."></textarea></div>
-            <div class="actions">
-                <button class="btn-primary" id="analyzeBtn"><i class="fas fa-brain"></i> Generate Analysis</button>
-                <button class="btn-secondary" id="clearProblem"><i class="fas fa-eraser"></i> Clear</button>
-                <button class="btn-secondary" id="loadSample"><i class="fas fa-flask"></i> Sample Data</button>
-            </div>
-            <div class="output" id="analysisOutput"><span class="placeholder">Analysis output will appear here once implemented.</span></div>
+    <div class="layout" style="flex-direction:column;gap:12px;max-width:1600px;">
+        <div class="ai-tabs" role="tablist">
+            <button class="ai-tab active" data-target="problemView" role="tab" aria-selected="true"><i class="fas fa-microscope"></i><span>Problem Analysis</span></button>
+            <button class="ai-tab" data-target="explainView" role="tab" aria-selected="false"><i class="fas fa-book-open"></i><span>Log Explanation</span></button>
         </div>
-        <!-- Log Explanation Panel -->
-        <div class="panel" id="explainPanel">
-            <h2><i class="fas fa-book-open"></i> Log Explanation</h2>
-            <div class="desc">Paste raw log lines to get per-line human readable explanations, component mapping, keyword meaning, and intent classification (planned feature).</div>
-            <div class="field"><label for="eLogs"><i class="fas fa-terminal"></i> Logs</label><textarea id="eLogs" placeholder="Paste raw log lines here..."></textarea></div>
-            <div class="actions">
-                <button class="btn-primary" id="explainBtn"><i class="fas fa-comments"></i> Explain Logs</button>
-                <button class="btn-secondary" id="clearExplain"><i class="fas fa-eraser"></i> Clear</button>
-                <button class="btn-secondary" id="sampleExplain"><i class="fas fa-flask"></i> Sample Logs</button>
+        <div class="panel single" id="problemView" role="tabpanel" aria-labelledby="Problem Analysis">
+            <div class="split-pane" data-default="0.4" id="problemSplit">
+                <div class="pane left">
+                    <div class="pane-inner">
+                        <h2 style="margin-top:2px;"><i class="fas fa-microscope"></i> Problem & Logs</h2>
+                        <div class="desc">Enter context + logs (left). Output renders on right. Default ratio 2:3; drag divider to adjust.</div>
+                        <div class="field"><label for="pTitle"><i class="fas fa-heading"></i> Title</label><input id="pTitle" placeholder="e.g. Camera ANR switching to video" /></div>
+                        <div class="field"><label for="pDesc"><i class="fas fa-align-left"></i> Description</label><textarea id="pDesc" class="short" placeholder="Steps, expected vs actual, device model, frequency..."></textarea></div>
+                        <div class="field" style="flex:1;display:flex;flex-direction:column;min-height:140px;">
+                            <label for="pLogs"><i class="fas fa-file-code"></i> Logs</label>
+                            <textarea id="pLogs" style="flex:1;min-height:140px;" placeholder="Paste relevant logcat / stack / ANR traces..."></textarea>
+                        </div>
+                        <div class="actions">
+                            <button class="btn-primary" id="analyzeBtn"><i class="fas fa-brain"></i> Analyze</button>
+                            <button class="btn-secondary" id="loadSample"><i class="fas fa-flask"></i> Sample</button>
+                            <button class="btn-secondary" id="clearProblem"><i class="fas fa-eraser"></i> Clear</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="divider" data-divider="problem"></div>
+                <div class="pane right">
+                    <div class="output-shell">
+                        <div class="output-header"><i class="fas fa-file-search"></i> AI Analysis Output</div>
+                        <div class="output-body" id="analysisOutput"><span class="placeholder">Analysis output will appear here.</span></div>
+                    </div>
+                </div>
             </div>
-            <div class="output" id="explainOutput"><span class="placeholder">Log explanation will appear here once implemented.</span></div>
+        </div>
+        <div class="panel single hidden" id="explainView" role="tabpanel" aria-labelledby="Log Explanation">
+            <div class="split-pane" data-default="0.4" id="explainSplit">
+                <div class="pane left">
+                    <div class="pane-inner">
+                        <h2 style="margin-top:2px;"><i class="fas fa-book-open"></i> Log Explanation</h2>
+                        <div class="desc">Paste log lines on left; explanations appear on right.</div>
+                        <div class="field" style="flex:1;display:flex;flex-direction:column;min-height:220px;">
+                            <label for="eLogs"><i class="fas fa-terminal"></i> Logs</label>
+                            <textarea id="eLogs" style="flex:1;min-height:220px;" placeholder="Paste raw log lines here..."></textarea>
+                        </div>
+                        <div class="actions">
+                            <button class="btn-primary" id="explainBtn"><i class="fas fa-comments"></i> Explain</button>
+                            <button class="btn-secondary" id="sampleExplain"><i class="fas fa-flask"></i> Sample</button>
+                            <button class="btn-secondary" id="clearExplain"><i class="fas fa-eraser"></i> Clear</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="divider" data-divider="explain"></div>
+                <div class="pane right">
+                    <div class="output-shell">
+                        <div class="output-header"><i class="fas fa-eye"></i> Explanation Output</div>
+                        <div class="output-body" id="explainOutput"><span class="placeholder">Log explanation will appear here.</span></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 <script>
@@ -106,6 +179,60 @@ document.getElementById('explainBtn').onclick=()=>{
  const lines=logs.split(/\r?\n/).filter(l=>l.trim());
  document.getElementById('explainOutput').innerHTML='<span class="placeholder">[Future] Will explain '+lines.length+' lines via AI.</span>';
 };
+
+// Tab switching
+document.querySelectorAll('.ai-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+        if(tab.classList.contains('active')) return;
+        document.querySelectorAll('.ai-tab').forEach(t=>t.classList.remove('active'));
+        tab.classList.add('active');
+        const target=tab.getAttribute('data-target');
+        document.querySelectorAll('[role="tabpanel"]').forEach(p=>p.classList.add('hidden'));
+        const view=document.getElementById(target); if(view) view.classList.remove('hidden');
+    });
+});
+
+// Draggable split (horizontal 2:3 default)
+function initSplit(containerId, storageKey){
+    const container=document.getElementById(containerId); if(!container) return;
+    const divider=container.querySelector('.divider');
+    const left=container.querySelector('.pane.left');
+    const right=container.querySelector('.pane.right');
+    const saved=localStorage.getItem(storageKey);
+    const defaultRatio=parseFloat(container.dataset.default||'0.4');
+    if(saved){left.style.flex=`0 0 ${parseFloat(saved)*100}%`;} else {left.style.flex=`0 0 ${defaultRatio*100}%`;}
+    divider.addEventListener('mousedown',startDrag);
+    divider.addEventListener('touchstart',startDrag,{passive:false});
+    function startDrag(e){
+        e.preventDefault();
+        divider.classList.add('dragging');
+        const startX=(e.touches?e.touches[0].clientX:e.clientX);
+        const rect=container.getBoundingClientRect();
+        const startWidth=left.getBoundingClientRect().width;
+        function move(ev){
+            const clientX=(ev.touches?ev.touches[0].clientX:ev.clientX);
+            let newW=startWidth+(clientX-startX);
+            const min=rect.width*0.18; const max=rect.width*0.75;
+            if(newW<min) newW=min; if(newW>max) newW=max;
+            const ratio=newW/rect.width;
+            left.style.flex=`0 0 ${ratio*100}%`;
+            localStorage.setItem(storageKey,ratio.toFixed(4));
+        }
+        function up(){
+            divider.classList.remove('dragging');
+            window.removeEventListener('mousemove',move);
+            window.removeEventListener('touchmove',move);
+            window.removeEventListener('mouseup',up);
+            window.removeEventListener('touchend',up);
+        }
+        window.addEventListener('mousemove',move);
+        window.addEventListener('touchmove',move,{passive:false});
+        window.addEventListener('mouseup',up);
+        window.addEventListener('touchend',up);
+    }
+}
+initSplit('problemSplit','ai_split_problem');
+initSplit('explainSplit','ai_split_explain');
 </script>
 </body>
 </html>

@@ -12,8 +12,8 @@
             body[data-theme='light'] textarea, body[data-theme='light'] .output {background:linear-gradient(145deg,#ffffff 0%,#f1f5f9 110%);}        
             body[data-theme='light'] .pane-head {background:#f1f5f9; color:#334155;} 
             body[data-theme='light'] .topbar {background:rgba(255,255,255,.9); box-shadow:0 2px 8px rgba(0,0,0,.06);} 
-            body[data-theme='light'] .top-link {color:#64748b;} 
-            body[data-theme='light'] .top-link:hover {background:#e2e8f0;color:#1e293b;} 
+            body[data-theme='light'] .top-link {color:#334155;} 
+            body[data-theme='light'] .top-link:hover {background:#e2e8f0;color:#0f172a;} 
             body[data-theme='light'] .top-link.active {background:var(--accent);color:#fff;} 
             body[data-theme='light'] .controls-bar, body[data-theme='light'] .meta {background:#f1f5f9;} 
             body[data-theme='light'] select, body[data-theme='light'] input[type=text] {background:#ffffff;border-color:#cbd5e1;color:#1e293b;} 
@@ -24,7 +24,7 @@
             body[data-theme='light'] .controls-bar {box-shadow:inset 0 1px 0 rgba(0,0,0,.04);}        
             body[data-theme='light'] textarea:focus {background:#f8fafc;}        
             body[data-theme='light'] .output {border-color:#d0d7e2;}        
-            body[data-theme='light'] .output .placeholder {color:#94a3b8;}        
+            body[data-theme='light'] .output .placeholder {color:#64748b;}        
             body[data-theme='light'] .pane-head {border-bottom:2px solid #e2e8f0;}        
             body[data-theme='light'] .top-link:focus-visible {outline:2px solid var(--accent);outline-offset:2px;}        
             body[data-theme='light'] .theme-toggle {color:#64748b;}        
@@ -39,7 +39,9 @@
             .theme-toggle:hover{background:#1e293b;color:var(--text);} 
             body[data-theme='light'] .theme-toggle:hover{background:#e2e8f0;color:#1e293b;}
         *{box-sizing:border-box;} body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;}
-        a{text-decoration:none;color:var(--text);} .topbar{display:flex;align-items:center;gap:18px;padding:10px 18px;background:#0c1424;border-bottom:1px solid var(--border);} .top-links{display:flex;gap:4px;}
+    a{text-decoration:none;color:var(--text);} .topbar{display:flex;align-items:center;gap:18px;padding:10px 18px;background:#0c1424;border-bottom:1px solid var(--border);} .top-links{display:flex;gap:4px;margin-left:12px;}
+    .brand-active{background:var(--accent-grad);color:#fff !important;padding:6px 12px;border-radius:10px;display:flex;align-items:center;gap:8px;font-weight:600;box-shadow:0 2px 8px -2px rgba(0,0,0,.55);letter-spacing:.09em;}
+    body[data-theme='light'] .brand-active{color:#fff !important;}
         .top-link{display:flex;align-items:center;gap:6px;padding:8px 14px;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;border:1px solid transparent;border-radius:8px;color:var(--text-soft);}        
         .top-link:hover{background:#1e293b;color:var(--text);} .top-link.active{background:var(--accent);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.4);}        
     .workspace{flex:1;display:flex;min-height:0;} .side{width:48%;display:flex;flex-direction:column;border-right:1px solid var(--border);background:linear-gradient(145deg,#1e293b 0%,#16243a 110%);}        
@@ -68,7 +70,7 @@
 </head>
 <body>
     <div class="topbar">
-        <div style="font-weight:600;font-size:.8rem;letter-spacing:.09em;color:#93c5fd;display:flex;align-items:center;gap:8px;"><i class="fas fa-language"></i> Translation Workspace</div>
+    <div class="brand-active" style="font-size:.8rem;"><i class="fas fa-language"></i> Translation Workspace</div>
         <div class="top-links">
             <a class="top-link" href="{{ url_for('index') }}"><i class="fas fa-bug"></i> Logs</a>
             <a class="top-link" href="{{ url_for('duplicate_finder') }}"><i class="fas fa-copy"></i> Duplicates</a>
