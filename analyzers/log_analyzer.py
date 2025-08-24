@@ -95,14 +95,17 @@ class LogAnalyzer:
                     'root_cause': 'Fatal exception headers detected via streaming scan (file path).',
                     'analysis_method': 'Streaming Fatal Exception Header Scan'
                 }
-        # Fallback to original in‑memory scan (keywords)
+        # Fallback to in‑memory scan (strict filtering now applied inside helper)
         simple = self._simple_keyword_scan(log_content, 'App Crashes', sub_issue_type)
         if simple:
+            # Hard safety: ensure only fatal exception lines for generic subtype
+            if sub_issue_type == 'App Crashes':
+                simple = [r for r in simple if 'fatal exception' in r.get('matched_line','').lower()]
             return {
                 'issue_type': f'App Crashes - {sub_issue_type}',
                 'relevant_logs': simple,
-                'root_cause': 'Preliminary keyword-based extraction (simple scan).',
-                'analysis_method': 'Simple Keyword Scan'
+                'root_cause': 'Strict keyword-based extraction.',
+                'analysis_method': 'Strict Keyword Scan'
             }
         return self._empty_result('App Crashes', sub_issue_type, 'Custom App Crash Analysis')
 
@@ -214,6 +217,22 @@ class LogAnalyzer:
             # Override: only keep 'fatal exception' lines per updated requirement (exclude process:, am_crash, fatal signal etc.)
             keywords_lower = ['fatal exception']
             restrict_activitymanager = True
+        # Generic noise substrings to always exclude to avoid clutter
+        noise_substrings = [
+            'slow operation',
+            'starting to update pids map',
+            'done updating pids map',
+            'battery stats',
+            'updating battery stats'
+        ]
+        # Optional allowlists per key for stricter filtering (line must contain one of these if specified)
+        allowlists = {
+            ('App Crashes', 'App Crashes'): ['fatal exception'],
+            ('App Crashes', 'App Force Stop'): ['force stopping', 'am_crash'],
+            ('App Crashes', 'ANR in App'): ['anr in', 'input dispatching timed out'],
+            ('App Crashes', 'Device Reboot'): ['fatal exception in system process'],
+        }
+        allowlist = [a.lower() for a in allowlists.get(key, [])]
         results = []
         # Simulate readline loop (no need to allocate all lines twice)
         lines = log_content.splitlines()
@@ -223,11 +242,19 @@ class LogAnalyzer:
                 # Skip noisy slow operation / battery stat lines
                 if 'activitymanager' in low and ('slow operation' in low or 'starting to update pids map' in low or 'done updating pids map' in low):
                     continue
+            # Skip any globally noisy lines
+            if any(ns in low for ns in noise_substrings):
+                continue
             matched_kw = None
             for kw in keywords_lower:
                 if kw in low:
                     matched_kw = kw
                     break
+            if not matched_kw:
+                continue
+            if allowlist:
+                if not any(a in low for a in allowlist):
+                    continue
             if matched_kw:
                 results.append({
                     'line_number': idx,
